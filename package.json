@@ -10,10 +10,10 @@
     "build:server": "cd ./server && npm run build",
     "build": "npm run build:client && npm run build:server",
     "start": "cd ./server && npm run start",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\""
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
   },
   "keywords": [],
-  "author": "",
+  "author": "Alan Bardales",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
