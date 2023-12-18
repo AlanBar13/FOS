@@ -1,0 +1,21 @@
+{
+  "name": "fos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:client": "cd ./client && npm run dev",
+    "dev:server": "cd ./server && npm run dev",
+    "build:client": "cd ./client && npm run build",
+    "build:server": "cd ./server && npm run build",
+    "build": "npm run build:client && npm run build:server",
+    "start": "cd ./server && npm run start",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
