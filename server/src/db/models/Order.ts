@@ -7,6 +7,7 @@ interface OrderAttributes {
     subtotal?: number
     taxTotal?: number
     total?: number
+    tips: number
     status?: string
     email?: string
     createdAt?: Date
@@ -19,6 +20,7 @@ class Order extends Model<OrderAttributes, OrderInput> implements OrderAttribute
     public subtotal!: number
     public taxTotal!: number
     public total!: number
+    public tips!: number
     public status!: string
     public email!: string
 
@@ -50,12 +52,16 @@ Order.init({
         defaultValue: 0
     },
     status: {
-        type: DataTypes.ENUM("created", "paid", "not-paid", "deleted", "ordering", "inKitchen", "served", "user-closed"),
+        type: DataTypes.ENUM("created", "paid", "notPaid", "deleted", "ordering", "inKitchen", "served", "userClosed"),
         allowNull: false,
         defaultValue: "created"
     },
     email: {
         type: DataTypes.STRING,
+    },
+    tips: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
     }
 }, {
     timestamps: true,
@@ -63,5 +69,5 @@ Order.init({
 })
 
 export default Order;
-export interface OrderInput extends Optional<OrderAttributes, 'id'| 'tableId'>{}
+export interface OrderInput extends Optional<OrderAttributes, 'id'| 'tableId' | 'tips'>{}
 export interface OrderOutput extends Required<OrderAttributes>{}

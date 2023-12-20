@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Order } from '../../../models/Order';
 import { Order as TableOrder, createCompareFn } from '../../../utils/tableUtils';
 
@@ -13,7 +14,7 @@ import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import TablePagination from '@mui/material/TablePagination';
 import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Tooltip from '@mui/material/Tooltip';
 
 import { formatPriceFixed } from '../../../utils/numbers';
@@ -65,6 +66,7 @@ const properties = [
 ]
 
 export default function OrdersDataComponent({ orders, onTableChange }: OrdersDataComponentProps) {
+    const navigate = useNavigate();
     const [order, setOrder] = useState<TableOrder>('asc');
     const [orderBy, setOrderBy] = useState<keyof Order>('id');
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -91,12 +93,12 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
         setPage(0);
     };
 
-    const onEditButtonClicked = (id?: number) => {
+    const onSeeButtonClicked = (id?: number) => {
         if (id == null){
             return;
         }
 
-        //onEditClicked(id)
+        return navigate(`/admin/orders/${id}`);
     }
 
     const getOrderStatusColor = (status: string) => {
@@ -168,10 +170,7 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
                                 </TableCell>
                             ))}
                             <TableCell>
-                                # PRODUCTOS
-                            </TableCell>
-                            <TableCell>
-                                Editar
+                                Ver
                             </TableCell>
                         </TableRow>
                     </TableHead>
@@ -186,11 +185,10 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
                                 <TableCell><Chip sx={{ background: getOrderStatusColor(item.status).color}} label={`${getOrderStatusColor(item.status).name}`} /></TableCell>
                                 <TableCell>{formatDate(item.createdAt)}</TableCell>
                                 <TableCell>{formatDate(item.updatedAt)}</TableCell>
-                                <TableCell>{item.items.length}</TableCell>
                                 <TableCell>
-                                    <Tooltip title={`Editar orden ${item.id}`}>
-                                        <IconButton onClick={() => onEditButtonClicked(item.id)}>
-                                            <EditIcon />
+                                    <Tooltip title={`Ver orden ${item.id}`}>
+                                        <IconButton onClick={() => onSeeButtonClicked(item.id)}>
+                                            <RemoveRedEyeIcon />
                                         </IconButton>
                                     </Tooltip>
                                 </TableCell>

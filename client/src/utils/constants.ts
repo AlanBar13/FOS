@@ -1,18 +1,76 @@
+export interface KeyValues {
+    key: string
+    value: string
+}
+
 export class OrderStatus {
-    static readonly created = "created";
-    static readonly ordering = "ordering";
-    static readonly deleted = "deleted";
-    static readonly paid = "paid";
-    static readonly notPaid = "not-paid";
-    static readonly inKitchen = "inKitchen";
-    static readonly served = "served";
-    static readonly userClosed = "user-closed";
+    static created = "created";
+    static ordering = "ordering";
+    static deleted = "deleted";
+    static paid = "paid";
+    static notPaid = "notPaid";
+    static inKitchen = "inKitchen";
+    static served = "served";
+    static userClosed = "userClosed";
+
+    static getSpanishName(status?: string): string{
+        if (status == null) {
+            return "Desconocido";
+        }
+        switch(status){
+            case this.created:
+                return "Creado";
+            case this.ordering:
+                return "Ordenando";
+            case this.deleted:
+                return "Borrado";
+            case this.paid:
+                return "Pagado";
+            case this.notPaid:
+                return "No Pagado";
+            case this.inKitchen:
+                return "En Cocina";
+            case this.served:
+                return "Servido";
+            case this.userClosed:
+                return "Cerrado x Usuario";
+            default:
+                return "Desconocido"
+        }
+    }
+
+    static getStatusArray(): KeyValues[] {
+        return Object.keys(OrderStatus).map(status => {
+            let obj: KeyValues = {
+                key: status,
+                value: this.getSpanishName(status)
+            }
+            return obj;
+        });
+    }
 }
 
 export class ItemStatus {
     static readonly ordered = "ordered";
     static readonly inProgress = "inProgress";
     static readonly done = "done";
+
+    static getSpanishName(status?: string): string {
+        if (status == null) {
+            return "Desconocido";
+        }
+
+        switch(status){
+            case this.ordered:
+                return "Ordenado";
+            case this.inProgress:
+                return "Preparando";
+            case this.done:
+                return "Listo";
+            default:
+                return "Desconocido"
+        }
+    }
 }
 
 export class UserRoles {
