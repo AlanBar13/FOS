@@ -2,7 +2,7 @@ import { useEffect, useState, SyntheticEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '../models/Table';
 import { fetchTables } from '../services/table.service';
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import NativeSelect from '@mui/material/NativeSelect';

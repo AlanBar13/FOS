@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import AdminDrawer from "../components/AdminPage/AdminDrawer";
 
 const drawerWidth = 60;

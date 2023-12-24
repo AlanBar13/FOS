@@ -4,7 +4,7 @@ import { Cart } from "../../models/Cart";
 import { formatPriceFixed } from "../../utils/numbers";
 import { OrderItem } from '../../models/OrderItem';
 
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';

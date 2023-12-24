@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Table } from '../../models/Table';
 import { fetchTables, createMultipleTables, deleteTables } from '../../services/table.service';
 
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import AdminAppBarComponent from "./Shared/AdminAppBarComponent";

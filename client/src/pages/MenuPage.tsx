@@ -12,7 +12,7 @@ import { Global } from '@emotion/react';
 import { styled } from '@mui/material/styles';
 import LinearProgress from '@mui/material/LinearProgress';
 import Snackbar from '@mui/material/Snackbar';
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Typography from '@mui/material/Typography';
 

@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CircularProgress from '@mui/material/CircularProgress';
 import { AlertColor } from '@mui/material/Alert';
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 
 import { foodCategories } from '../../../utils/constants';
 import { Menu } from '../../../models/Menu';
