@@ -1,6 +1,4 @@
-import { OrderItem } from "../../../models/OrderItem";
-import { formatPriceFixed } from "../../../utils/numbers";
-import { ItemStatus } from "../../../utils/constants";
+import { OrderItem } from "../../../models/OrderAdapter";
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -35,12 +33,12 @@ export default function OrderItemTableComponent({ items = [] }: OrderItemTableCo
                 <TableBody>
                     {items.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.Menu.name}</TableCell>
-                            <TableCell>{ItemStatus.getSpanishName(item.status)}</TableCell>
+                            <TableCell>{item.menuName}</TableCell>
+                            <TableCell>{item.status}</TableCell>
                             <TableCell>{item.qty}</TableCell>
-                            <TableCell>{formatPriceFixed(item.Menu.price)}</TableCell>
-                            <TableCell>{formatPriceFixed(item.Menu.tax)}</TableCell>
-                            <TableCell>{formatPriceFixed(item.qty * item.Menu.price)}</TableCell>
+                            <TableCell>{item.menuPrice}</TableCell>
+                            <TableCell>{item.menuTax}</TableCell>
+                            <TableCell>{item.total}</TableCell>
                             <TableCell>
                                 <IconButton>
                                     <EditIcon />

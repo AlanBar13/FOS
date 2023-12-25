@@ -1,44 +1,24 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchOrder } from '../../../services/order.service';
-import { GetOrder } from '../../../models/Order';
-import { formatDate } from '../../../utils/dates';
-import { formatPriceFixed } from '../../../utils/numbers';
-import { OrderStatus } from '../../../utils/constants';
+import { Adapter } from '../../../utils/adapter';
+import { OrderAdapter, Order } from '../../../models/OrderAdapter';
 import AdminAppBarComponent from '../Shared/AdminAppBarComponent';
-import OrderItemTableComponent from './OrderItemTableComponent';
 import OrderPreviewFormComponent from './OrderPreviewFormComponent';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import "./OrderPreviewComponent.css"
+import { useApi } from '../../../hooks/useApi';
+import OrderItemTableComponent from './OrderItemTableComponent';
 
 
 export default function OrderPreviewComponent() {
     const { id } = useParams();
-    const [orderData, setOrderData] = useState<GetOrder | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    useEffect(() => {
-        const getData = async () => {
-            setIsLoading(true);
-            try {
-                if (id == null){
-                    //navigate to 404 page?
-                    return;
-                }
-    
-                const data = await fetchOrder(id)
-                setOrderData(data);
-            } catch (error) {
-                console.log(error);
-            }
-            setIsLoading(false);
-        }
-        
-        getData();
-    }, []);
+    const { data, isLoading, error } = useApi<Order>({ 
+        route: `/admin/order/${id}`, 
+        method: "GET", 
+        adapterFn: (data) => Adapter.from(data).to((item) => new OrderAdapter(item).adapt())
+    });
 
     return (
         <>
@@ -46,33 +26,42 @@ export default function OrderPreviewComponent() {
             {isLoading ? (
                 <CircularProgress />
             ) : (
-                <div>
-                    <Paper sx={{display: 'flex', flexDirection: "row", justifyContent: 'space-around'}}>
-                        <div className='order-preview_data'>
-                            <Typography variant='h6'>Mesa # {orderData?.order.tableId}</Typography>
-                            <Typography variant='h6'>Status: {OrderStatus.getSpanishName(orderData?.order.status)}</Typography>
-                        </div>
-                        <Divider orientation='vertical' flexItem />
-                        <div className='order-preview_data'>
-                            <Typography variant='h6'>Subtotal: {formatPriceFixed(orderData?.order.subtotal)}</Typography>
-                            <Typography variant='h6'>IVA: {formatPriceFixed(orderData?.order.taxTotal)}</Typography>
-                        </div>
-                        <Divider orientation='vertical' flexItem />
-                        <div className='order-preview_data'>
-                            <Typography variant='h6'>Total: {formatPriceFixed(orderData?.order.total)}</Typography>
-                            <Typography variant='h6'>Propina: {formatPriceFixed(orderData?.order.tips)}</Typography>
-                        </div>
-                        <Divider orientation='vertical' flexItem />
-                        <div className='order-preview_data'>
-                            <Typography variant='h6'>Creado en: {formatDate(orderData?.order.createdAt)}</Typography>
-                            <Typography variant='h6'>Actualizado en: {formatDate(orderData?.order.updatedAt)}</Typography>
-                        </div>
-                    </Paper>
-                    <Divider sx={{ margin: '1rem' }} flexItem />
-                    <OrderPreviewFormComponent orderStatus={orderData?.order.status} />
-                    <Divider sx={{ margin: '1rem' }} flexItem />
-                    <OrderItemTableComponent items={orderData?.items} />
-                </div>
+                data ? (
+                    <div>
+                        <Paper sx={{display: 'flex', flexDirection: "row", justifyContent: 'space-around'}}>
+                            <div className='order-preview_data'>
+                                <Typography variant='h6'>Mesa # {data.tableId}</Typography>
+                                <Typography variant='h6'>Status: {data.formatedStatus}</Typography>
+                            </div>
+                            <Divider orientation='vertical' flexItem />
+                            <div className='order-preview_data'>
+                                <Typography variant='h6'>Subtotal: {data.subTotal}</Typography>
+                                <Typography variant='h6'>IVA: {data.taxTotal}</Typography>
+                            </div>
+                            <Divider orientation='vertical' flexItem />
+                            <div className='order-preview_data'>
+                                <Typography variant='h6'>Total: {data.total}</Typography>
+                                <Typography variant='h6'>Propina: {data.tips}</Typography>
+                            </div>
+                            <Divider orientation='vertical' flexItem />
+                            <div className='order-preview_data'>
+                                <Typography variant='h6'>Creado en: {data.createdAt}</Typography>
+                                <Typography variant='h6'>Actualizado en: {data.updatedAt}</Typography>
+                            </div>
+                        </Paper>
+                        <Divider sx={{ margin: '1rem' }} flexItem />
+                        <OrderPreviewFormComponent orderStatus={data.status} />
+                        <Divider sx={{ margin: '1rem' }} flexItem />
+                        <OrderItemTableComponent items={data.items} />
+                    </div>
+                ) : (
+                    <div>
+                        <Typography>
+                            Orden No disponible
+                        </Typography>
+                        {error}
+                    </div>
+                )
             )} 
         </>
     )

@@ -5,10 +5,6 @@ export const numberWithCommas = (x = '') =>
 
 export const nunberWithCommasFixed = (x: number) => numberWithCommas(x.toFixed(2));
 
-export const formatPriceFixed = (val?: number) => {
-  if (val == null){
-    return;
-  }
-
+export const formatPriceFixed = (val: number) => {
   return `$ ` + nunberWithCommasFixed(val);
 };
