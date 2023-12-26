@@ -1,6 +1,9 @@
 import { useParams } from 'react-router-dom';
-import { Adapter } from '../../../utils/adapter';
-import { OrderAdapter, Order } from '../../../models/OrderAdapter';
+import { GetOrder, Order, OrderItem, getOrderItemStatusString, getOrderStatusSring } from '../../../models/Order';
+import { useApi } from '../../../hooks/useApi';
+import OrderItemTableComponent from './OrderItemTableComponent';
+import { Mapper } from '../../../models/Mapper';
+import { formatPriceFixed } from '../../../utils/numbers';
 import AdminAppBarComponent from '../Shared/AdminAppBarComponent';
 import OrderPreviewFormComponent from './OrderPreviewFormComponent';
 import Paper from '@mui/material/Paper';
@@ -8,8 +11,6 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import "./OrderPreviewComponent.css"
-import { useApi } from '../../../hooks/useApi';
-import OrderItemTableComponent from './OrderItemTableComponent';
 
 
 export default function OrderPreviewComponent() {
@@ -17,7 +18,38 @@ export default function OrderPreviewComponent() {
     const { data, isLoading, error } = useApi<Order>({ 
         route: `/admin/order/${id}`, 
         method: "GET", 
-        adapterFn: (data) => Adapter.from(data).to((item) => new OrderAdapter(item).adapt())
+        mapperFn: (data) => Mapper<Order>(data, (item) => {
+            const obj = item as GetOrder;
+            const newOrder: Order = {
+                id: obj.order.id,
+                tableId: obj.order.tableId,
+                formatedStatus: getOrderStatusSring(obj.order.status),
+                status: obj.order.status,
+                subTotal: formatPriceFixed(obj.order.subtotal),
+                taxTotal: formatPriceFixed(obj.order.taxTotal),
+                total: formatPriceFixed(obj.order.total),
+                tips: formatPriceFixed(obj.order.tips),
+                items: obj.items.map(item => {
+                    const obj: OrderItem = {
+                        orderId: item.orderId,
+                        id: item.id,
+                        menuId: item.menuId,
+                        qty: item.qty,
+                        menuName: item.Menu.name,
+                        menuPrice: formatPriceFixed(item.Menu.price),
+                        menuTax: formatPriceFixed(item.Menu.tax),
+                        total: formatPriceFixed((item.Menu.price + item.Menu.tax) * item.qty),
+                        comments: item.comments,
+                        status: getOrderItemStatusString(item.status)
+                    };
+    
+                    return obj;
+                }),
+                createdAt: new Date(obj.order.createdAt).toLocaleString(),
+                updatedAt: new Date(obj.order.createdAt).toLocaleString()
+            };
+            return newOrder;
+        })
     });
 
     return (

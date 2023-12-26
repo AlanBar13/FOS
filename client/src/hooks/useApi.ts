@@ -7,10 +7,10 @@ interface ApiCallContext {
     method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
     body?: any
     config?: AxiosRequestConfig<any>
-    adapterFn: (data: any) => any
+    mapperFn: (data: any) => any
 }
 
-export function useApi<Source>({route, method, body, config, adapterFn}: ApiCallContext){
+export function useApi<Source>({route, method, body, config, mapperFn}: ApiCallContext){
     const [data, setData] = useState<Source | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function useApi<Source>({route, method, body, config, adapterFn}: ApiCall
                         setError(`Not Implemented Method: ${method}`)
                         break;
                 }
-                setData(adapterFn(responseData));
+                setData(mapperFn(responseData));
             } catch (error) {
                 setData(null);
                 setError(`${error}`);
