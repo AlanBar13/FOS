@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Menu {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  description String?
+  available   Boolean     @default(false)
+  category    String?     @db.VarChar(255)
+  price       Float
+  tax         Float?
+  img         String?
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime?   @db.Timestamptz(6)
+  OrderItem   OrderItem[]
+}
+
+model OrderItem {
+  id        Int                    @id @default(autoincrement())
+  orderId   Int
+  menuId    Int
+  qty       Int                    @default(1)
+  comments  String?                @db.VarChar(255)
+  status    enum_OrderItems_status
+  createdAt DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime?              @db.Timestamptz(6)
+  Menu      Menu                   @relation(fields: [menuId], references: [id])
+  Order     Order                  @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id         Int                @id @default(autoincrement())
+  tableId    Int
+  subtotal   Float              @default(0)
+  taxTotal   Float              @default(0)
+  total      Float              @default(0)
+  status     enum_Orders_status @default(created)
+  email      String?            @db.VarChar(255)
+  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime?          @db.Timestamptz(6)
+  tips       Float              @default(0)
+  OrderItems OrderItem[]
+}
+
+model Tables {
+  id        Int      @id @default(autoincrement())
+  name      String?  @db.VarChar(255)
+  location  String?  @db.VarChar(255)
+  qrcode    String?
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime? @db.Timestamptz(6)
+}
+
+model Users {
+  id        Int             @id @default(autoincrement())
+  username  String          @unique @db.VarChar(255)
+  password  String          @db.VarChar(255)
+  role      enum_Users_role @default(viewer)
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime?       @db.Timestamptz(6)
+}
+
+enum enum_OrderItems_status {
+  ordered
+  inProgress
+  done
+}
+
+enum enum_Orders_status {
+  created
+  paid
+  notPaid
+  deleted
+  ordering
+  inKitchen
+  served
+  userClosed
+}
+
+enum enum_Users_role {
+  admin
+  waiter
+  viewer
+  dev
+}

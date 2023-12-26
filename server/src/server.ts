@@ -3,7 +3,6 @@ import express, { Express } from "express";
 import cors from "cors";
 import compression from "compression";
 import path from 'path';
-import dbInit from "./db/init";
 import { Server } from "socket.io";
 
 import admMenuRoutes from "./routes/admin/menu.routes";
@@ -39,8 +38,6 @@ app.use((req: CustomRequest, res, next) => {
     req.io = io;
     return next();
 })
-
-dbInit();
 
 app.get("/v1/paymentMethods", (req, res) => {
     res.json(PaymentMethods.paymentMethods);

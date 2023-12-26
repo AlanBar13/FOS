@@ -1,12 +1,13 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
-import bcrypt from 'bcryptjs';
-import { UserInput } from "../db/models/User";
-import { getAllUsers, createUser, getUserById, deleteUserById, getUserByUsername } from '../services/user.service';
+import { Prisma, Users } from "@prisma/client";
 import generateToken from "../utils/generateJWTToken";
-import { JWTUser, CustomRequest } from "../types";
+import { CustomRequest } from "../types";
 import { UserRoles } from "../constants";
+import { excludeFields } from "../db/utils";
+import db from '../db/client';
 
+const select = excludeFields<Prisma.UsersFieldRefs>(db.users.fields, ["password"]);
 
 export const getUsers = asyncHandler(async (req: CustomRequest, res: Response) => {
     const authUser = req.user;
@@ -16,7 +17,7 @@ export const getUsers = asyncHandler(async (req: CustomRequest, res: Response) =
     }
 
     if (authUser.role === UserRoles.admin || authUser.role === UserRoles.dev){
-        const users = await getAllUsers();
+        const users = await db.users.findMany({ select })
 
         res.json(users)
     }else{
@@ -34,12 +35,11 @@ export const registerUser = asyncHandler(async (req: CustomRequest, res: Respons
 
     //Only devs or admin can create new users
     if (authUser.role === UserRoles.admin || authUser.role === UserRoles.dev){
-        const payload: UserInput = req.body;
+        const payload: Users = req.body;
+        const user = await db.users.signup(payload.username, payload.password, payload.role);
 
         //TODO: Set User creation guidelines
         //TODO: send errors if username or password doesnt follow guidelines
-        const user = await createUser(payload);
-
         if (user){
             res.json(user);
         }else{
@@ -61,7 +61,7 @@ export const getUser = asyncHandler(async (req: CustomRequest, res: Response) =>
     if (authUser.role === UserRoles.admin || authUser.role === UserRoles.dev){
         const id = Number(req.params.id);
 
-        const user = await getUserById(id);
+        const user = await db.users.findUnique({ where: { id }, select });
 
         res.json(user)
     }else{
@@ -80,7 +80,7 @@ export const deleteUser = asyncHandler(async (req: CustomRequest, res: Response)
     if (authUser.role === UserRoles.admin || authUser.role === UserRoles.dev){
         const id = Number(req.params.id);
 
-        const deleted = await deleteUserById(id);
+        const deleted = await db.users.delete({ where: { id }});
 
         if (deleted){
             res.json({"message": `User ${id} was deleted successfully`})
@@ -96,19 +96,15 @@ export const deleteUser = asyncHandler(async (req: CustomRequest, res: Response)
 export const authUser = asyncHandler(async (req: Request, res: Response) => {
     const {username, password} = req.body;
 
-    const user = await getUserByUsername(username, false);
-    if (user && (await bcrypt.compare(password, user.password))){
-        const fetchedUser: JWTUser = {
-            id: user.id,
-            username: user.username,
-            role: user.role
-        }
+    const userData = await db.users.checkUser(username, password);
+
+    if (userData !== null){
         res.json({
-            token: generateToken(fetchedUser),
-            role: fetchedUser.role
-        })
-    }else {
+            token: generateToken(userData),
+            role: userData.role
+        });
+    }else{
         res.status(401);
-        throw new Error('Wrong password');
+        throw new Error('Wrong password or Incorrect username');
     }
 })

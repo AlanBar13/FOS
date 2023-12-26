@@ -5,6 +5,11 @@ import { User } from '../db/models';
 import asyncHandler from "express-async-handler";
 import logger from '../utils/logger';
 import env from "../config/env";
+import db from "../db/client";
+import { excludeFields } from "../db/utils";
+import { Prisma } from "@prisma/client";
+
+const select = excludeFields<Prisma.UsersFieldRefs>(db.users.fields, ["password"]);
 
 export const protectRoutes = asyncHandler(async (req: CustomRequest, res: Response, next: NextFunction) => {
     let token;
@@ -12,9 +17,19 @@ export const protectRoutes = asyncHandler(async (req: CustomRequest, res: Respon
         try {
             token = req.headers.authorization.split(' ')[1];
             const decoded: JWTUser = (jwt.verify(token, env.jwtSecret ?? "")) as JWTUser;
-            const user = await User.findByPk(decoded.id, { attributes: { include: ["id", "username", "role"]}});
-            req.user = user as JWTUser;
-            next();
+            const user = await db.users.findUnique({ where: { id: decoded.id }, select });
+            if (user) {
+                const jwtUser: JWTUser = {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role
+                }
+                req.user = jwtUser;
+                next();
+            }else{
+                res.status(401);
+                throw new Error(`Not Authorized, user not found`);
+            }
         } catch (error) {
             logger.error(error);
             res.status(401);

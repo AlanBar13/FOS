@@ -1,26 +1,38 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
-import { MenuInput } from "../db/models/Menu";
-import { getAllMenuItems, createMenuItem, updateMenuItem, getMenuItemById, deleteMenuItemById } from '../services/menu.service';
+import { Menu } from '@prisma/client';
 import logger from "../utils/logger";
 import cache from "../utils/cache";
+import db from '../db/client';
 
 export const getMenuItems = asyncHandler(async (req: Request, res: Response) => {
     const { onlyAvailable } = req.query;
     const boolAvailable = Boolean(onlyAvailable);
-    const menu = await getAllMenuItems({ available: boolAvailable });
-    // Save in cache only list of available
+
+    let allMenu;
     if (boolAvailable){
-        cache.set(req.originalUrl, menu, 120);
+        allMenu = await db.menu.findMany({ where: { available: boolAvailable }});
+    }else {
+        allMenu = await db.menu.findMany();
     }
-    
-    res.json(menu);
+
+    cache.set(req.originalUrl, allMenu, 120);
+    res.json(allMenu);
 })
 
 export const registerMenuItem = asyncHandler(async (req: Request, res: Response) => {
-    const payload: MenuInput = req.body;
+    const payload = req.body;
 
-    const menuItem = await createMenuItem(payload);
+    const menuItem = await db.menu.create({
+        data: {
+            name: payload.name,
+            description: payload.description,
+            price: payload.price,
+            available: payload.available,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }
+    });
 
     res.json(menuItem)
 })
@@ -28,16 +40,16 @@ export const registerMenuItem = asyncHandler(async (req: Request, res: Response)
 export const getItem = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const menuItem = await getMenuItemById(id);
+    const menuItem = await db.menu.findFirst({ where: { id }});
 
     res.json(menuItem)
 })
 
 export const updateItem = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const payload: MenuInput = req.body;
+    const payload: Menu = req.body;
 
-    const menuItem = await updateMenuItem(id, payload);
+    const menuItem = await db.menu.update({ where: { id }, data : {...payload, updatedAt: new Date() }});
 
     res.json(menuItem)
 })
@@ -45,7 +57,7 @@ export const updateItem = asyncHandler(async (req: Request, res: Response) => {
 export const deleteItem = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const deleted = await deleteMenuItemById(id);
+    const deleted = await db.menu.delete({ where: { id }});
 
     if (deleted){
         res.json({"message": `Menu Item ${id} deleted successfully`})
