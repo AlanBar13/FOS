@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
-import { Menu } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import logger from "../utils/logger";
 import cache from "../utils/cache";
 import db from '../db/client';
@@ -47,7 +47,7 @@ export const getItem = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateItem = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const payload: Menu = req.body;
+    const payload: Prisma.MenuCreateInput = req.body;
 
     const menuItem = await db.menu.update({ where: { id }, data : {...payload, updatedAt: new Date() }});
 
