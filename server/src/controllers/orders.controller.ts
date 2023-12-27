@@ -1,15 +1,16 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
-import { OrderInput } from "../db/models/Order";
-import { getAllOrders, getOrderById, createOrder, updateOrderById, deleteOrderById, updateOrderStatsuById, checkIfActiveOrderForTable } from '../services/order.service';
-import { getAllOrdersItemsByOrder, updateOrderItemStatusById, getMostOrderedItem } from '../services/orderItems.service';
-import { getMenuItemById } from '../services/menu.service';
+import { Prisma, enum_Orders_status } from "@prisma/client";
 import { OrderStatus, ItemStatus, FoodCategories } from '../constants';
 import { CustomRequest, OrderQueryFilters } from "../types";
 import { sendTicketEmail } from "../services/email.service";
+import db from '../db/client';
+import { excludeFields } from "../db/utils";
+
+const select = excludeFields<Prisma.OrderFieldRefs>(db.order.fields, ["email"]);
 
 export const getOrders = asyncHandler(async (req: Request, res: Response) => {
-    const orders = await getAllOrders();
+    const orders = await db.order.findMany();
 
     res.json(orders)
 })
@@ -17,7 +18,14 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
 export const registerOrder = asyncHandler(async (req: Request, res: Response) => {
     const tableId = Number(req.params.tableId);
 
-    const order = await createOrder(tableId);
+    const order = await db.order.create({
+        data: {
+            tableId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        },
+        include: { OrderItems: true },
+    });
 
     res.json(order)
 })
@@ -25,16 +33,16 @@ export const registerOrder = asyncHandler(async (req: Request, res: Response) =>
 export const getOrder = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const order = await getOrderById(id);
+    const order = await db.order.findUnique({ where: { id }, include: { OrderItems: true } });
 
     res.json(order)
 })
 
 export const updateOrder = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const payload: OrderInput = req.body;
+    const payload: Prisma.OrderUpdateInput = req.body;
 
-    const updatedOrder = await updateOrderById(id, payload);
+    const updatedOrder = await db.order.update({ where: { id }, data: payload });
 
     res.json(updatedOrder)
 })
@@ -42,7 +50,7 @@ export const updateOrder = asyncHandler(async (req: Request, res: Response) => {
 export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const deleted = await deleteOrderById(id);
+    const deleted = await db.order.delete({ where: { id }});
 
     if (deleted){
         res.json({"message": `Menu Item ${id} deleted successfully`})
@@ -52,40 +60,46 @@ export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
 })
 
 export const submitOrderToKitchen = asyncHandler(async (req: CustomRequest, res: Response) => {
-    const orderId = Number(req.params.orderId);
-    const tableId = Number(req.params.tableId);
-    const itemIds: Array<number> = req.body.itemsIds;
+    try {
+        const orderId = Number(req.params.orderId);
+        const tableId = Number(req.params.tableId);
+        const itemIds: Array<number> = req.body.itemsIds;
 
-    if (!itemIds || itemIds.length === 0){
-        res.status(400);
-        throw new Error(`No itemIds sent`)
-    }
+        if (!itemIds || itemIds.length === 0){
+            res.status(400);
+            throw new Error(`No itemIds sent`)
+        }
 
-    const order = await getOrderById(orderId);
+        await db.order.update({ 
+            where: { 
+                id: orderId,
+                tableId
+            }, 
+            data: {
+                status: OrderStatus.inKitchen
+            }
+        });
 
-    if (order.tableId !== tableId){
-        res.status(400);
-        throw new Error(`Order does not belong to Table`)
-    }
-
-    const updated = await updateOrderStatsuById(orderId, OrderStatus.inKitchen);
-
-    if (updated){
-        await Promise.all(
-            itemIds.map(async (id) => {
-                await updateOrderItemStatusById(id, ItemStatus.inProgress);
-            })
-        )
-        res.json({"message": `Order ${orderId}, is being prepared in Kitchen`})
-    }else{
-        throw new Error(`Order could not be updated`)
+        await db.orderItem.updateMany({ 
+            where: { orderId },
+            data: {
+                status: ItemStatus.inProgress
+            }
+        });
+        res.json({"message": `Order ${orderId}, is being prepared in Kitchen`});
+    } catch (error) {
+        throw new Error(`Order cannot be updated ${error}`);
     }
 })
 
 export const changeOrderToReady = asyncHandler(async (req: CustomRequest, res: Response) => {
     const id = Number(req.params.id);
 
-    const order = await getOrderById(id);
+    const order = await db.order.findUnique({
+        where: {
+            id
+        }
+    });
 
     if(!order){
         res.status(404);
@@ -94,17 +108,21 @@ export const changeOrderToReady = asyncHandler(async (req: CustomRequest, res: R
 
 
     if (order.status === OrderStatus.inKitchen){
-        const items = await getAllOrdersItemsByOrder(id);
+        await db.order.update({
+            where: {
+                id
+            },
+            data: {
+                status: OrderStatus.served
+            }
+        });
 
-        Promise.all(
-            items.map(async (item) => {
-                if (item.status !== ItemStatus.done){
-                    await updateOrderItemStatusById(item.id, ItemStatus.done);
-                }
-            })
-        );
-
-        await updateOrderStatsuById(id, OrderStatus.served);
+        await db.orderItem.updateMany({ 
+            where: { orderId: id },
+            data: {
+                status: ItemStatus.done
+            }
+        });
     }else {
         res.status(400)
         throw new Error(`Order not in kitchen status`);
@@ -116,15 +134,20 @@ export const changeOrderToReady = asyncHandler(async (req: CustomRequest, res: R
 export const isOrderActive = asyncHandler(async (req: Request, res: Response) => {
     const tableId = Number(req.params.tableId);
 
-    const activeOrder = await checkIfActiveOrderForTable(tableId);
+    const activeOrder = await db.order.findFirst({
+        where: {
+            tableId,
+            status: {
+                notIn: ["paid", "deleted", "notPaid", "userClosed"]
+            }
+        },
+        include: {
+            OrderItems: true
+        }
+    });
 
     if (activeOrder){
-        const orderItems = await getAllOrdersItemsByOrder(activeOrder);
-        if (orderItems){
-            res.json({"orderId": activeOrder, "items": orderItems })
-        }else{
-            res.json({"orderId": activeOrder, "items": [] })
-        }
+        res.json(activeOrder);
     }else{
         res.status(202);
         res.json({"message": "No active order" })
@@ -136,19 +159,27 @@ export const closeOrder = asyncHandler(async (req: Request, res: Response) => {
     const tableId = Number(req.params.tableId);
     const emails: string[] = req.body.emails;
 
-    const order = await getOrderById(orderId);
-
-    if (order.tableId !== tableId){
-        res.status(400);
-        throw new Error(`Order does not belong to Table`)
-    }
-
-    const updated = await updateOrderStatsuById(orderId, OrderStatus.userClosed);
+    const updated = await db.order.update({
+        where: {
+            id: orderId,
+            tableId
+        },
+        data: {
+            status: OrderStatus.userClosed
+        }
+    });
 
     if (updated){
-        const orderItems = await getAllOrdersItemsByOrder(orderId);
         if (emails && emails.length > 0){
-            await sendTicketEmail(emails, updated, orderItems);
+            const items = await db.orderItem.findMany({
+                where: {
+                    orderId
+                },
+                include: {
+                    Menu: true
+                }
+            });
+            await sendTicketEmail(emails, updated, items);
         }
         res.json({"message": `Order ${orderId} closed sucessfully`})
     }else{
@@ -156,60 +187,33 @@ export const closeOrder = asyncHandler(async (req: Request, res: Response) => {
     }
 })
 
-export const getOrderSummary = asyncHandler(async (req: Request, res: Response) => {
-    const result = {
-        mostOrdered: "",
-        totalToday: 0,
-        ordersToday: 0,
-        orderClosed: 0
-    }
-
-    const mostOrdered = await getMostOrderedItem();
-    if(mostOrdered && mostOrdered.length > 0){
-        for(let i = 0; i <= mostOrdered.length; i++){
-            const menuItem = await getMenuItemById(mostOrdered[i].menuId);
-            if (menuItem.category !== FoodCategories.drinks && menuItem.category !== FoodCategories.dessert){
-                result.mostOrdered = menuItem.name;
-                break;
-            }
-        }
-    }
-
-    const filters: OrderQueryFilters = {
-        startDate: new Date()
-    }
-    const orders = await getAllOrders(filters);
-    if (orders.length > 0){
-        result.ordersToday = orders.length;
-        let total = 0;
-        let closed = 0;
-        orders.map((order) => {
-            if (order.status === OrderStatus.paid){
-                total += order.total;
-                closed += 1;
-            }
-        });
-        result.totalToday = total;
-        result.orderClosed = closed;
-    }
-    
-    res.json(result)
-})
-
 export const getOrderWithItems = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const order = await getOrderById(id);
-    const items = await getAllOrdersItemsByOrder(id);
+    const order = await db.order.findUnique({
+        where: {
+            id
+        },
+        include: {
+            OrderItems: true
+        }
+    })
 
-    res.json({order, items})
+    res.json(order);
 })
 
 export const changeOrderStatusAdmin = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const status = req.params.status
 
-    const updated = await updateOrderStatsuById(id, status);
+    const updated = await db.order.update({
+        where: {
+            id
+        },
+        data: {
+            status: status as enum_Orders_status
+        }
+    });
 
     res.json(updated);
 })

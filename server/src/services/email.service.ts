@@ -2,8 +2,7 @@ import nodemailer from 'nodemailer';
 import env from '../config/env';
 import hbs from 'nodemailer-express-handlebars';
 import logger from '../utils/logger';
-import { OrderOutput } from "../db/models/Order";
-import { OrderItemOutput } from "../db/models/OrderItem";
+import { Order, OrderItem, Menu } from '@prisma/client';
 import { format, parseISO } from 'date-fns';
 
 const hbsOptions = {
@@ -22,18 +21,22 @@ const transporter = nodemailer.createTransport({
   auth: { user: env.email.user, pass: env.email.pass },
 });
 
+interface ExtOrderItems extends OrderItem {
+  Menu: Menu
+}
+
 /**
 * Sends order ticket to user when order is completed
 *
 * @param payload - Order Item attributes
 * @returns Order Item from DB
 */
-export const sendTicketEmail = async (to: string[], order: OrderOutput, items: OrderItemOutput[]) => {
+export const sendTicketEmail = async (to: string[], order: Order, items: ExtOrderItems[]) => {
   transporter.use('compile', hbs(hbsOptions));
 
   const menuItems = items.map(item => {
     return {
-      name: item.Menu?.name,
+      name: item.Menu.name,
       qty: item.qty,
       total: formatPriceFixed(item.Menu!.price * item.qty),
     }

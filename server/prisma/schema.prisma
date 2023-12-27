@@ -49,11 +49,11 @@ model Order {
 }
 
 model Tables {
-  id        Int      @id @default(autoincrement())
-  name      String?  @db.VarChar(255)
-  location  String?  @db.VarChar(255)
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  location  String?   @db.VarChar(255)
   qrcode    String?
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt DateTime? @db.Timestamptz(6)
 }
 

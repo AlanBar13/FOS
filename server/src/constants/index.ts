@@ -3,10 +3,10 @@ export class OrderStatus {
     static readonly ordering = "ordering";
     static readonly deleted = "deleted";
     static readonly paid = "paid";
-    static readonly notPaid = "not-paid";
+    static readonly notPaid = "notPaid";
     static readonly inKitchen = "inKitchen";
     static readonly served = "served";
-    static readonly userClosed = "user-closed";
+    static readonly userClosed = "userClosed";
 }
 
 export class ItemStatus {
