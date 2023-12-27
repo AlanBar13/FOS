@@ -1,4 +1,5 @@
-import { useState, useMemo, ChangeEvent } from 'react'
+import { useState, useMemo, ChangeEvent } from 'react';
+import { useAlert } from '../../../hooks/useAlert';
 
 import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
@@ -12,7 +13,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CircularProgress from '@mui/material/CircularProgress';
-import { AlertColor } from '@mui/material/Alert';
 import {Box} from '@mui/material';
 
 import { foodCategories } from '../../../utils/constants';
@@ -23,7 +23,6 @@ interface AddItemComponentProps {
     menu?: Menu | null
     edit?: boolean
     onAddItem: (newItem: Menu) => void
-    onFeedback: (message: string, alertSeverity?: AlertColor) => void
     onUpdateItem?: (updatedItem: Menu) => void
     onCancel?: () => void
 }
@@ -57,7 +56,8 @@ const defaultItem : Menu = {
     img: undefined
 }
 
-export default function AddItemComponent({ menu = null, edit, onAddItem, onFeedback, onUpdateItem, onCancel }: AddItemComponentProps){
+export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdateItem, onCancel }: AddItemComponentProps){
+    const { showAlert } = useAlert();
     const [item, setItem] = useState<Menu>(menu !== null ? menu : defaultItem);
     const [imageLoading, setImageLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -111,7 +111,7 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onFeedb
             setUploadText(`Imagen cargada correctamente: ${file.name}`);
         } catch (error) {
             console.log(error);
-            onFeedback("Error al subir imagen");
+            showAlert('Error al subir imagen', 'error');
             setUploadText(`Error cargando imagen`);
         }
         setImageLoading(false);
@@ -125,10 +125,10 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onFeedb
                 onUpdateItem!(updatedItem);
                 setItem(defaultItem);
                 setUploadText("");
-                onFeedback(`Se acrualizo ${updatedItem.name} correctamente`, "success");
+                showAlert(`Se acrualizo ${updatedItem.name} correctamente`, 'success');
             } catch (error) {
                 console.log(error);
-                onFeedback("Error al actualizar el producto");
+                showAlert('Error al actualizar el producto', 'error');
             }
             onCancel!()
         }else {
@@ -137,10 +137,10 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onFeedb
                 onAddItem(newItem);
                 setItem(defaultItem);
                 setUploadText("");
-                onFeedback(`Se agrego ${newItem.name} correctamente`, "success");
+                showAlert(`Se agrego ${newItem.name} correctamente`, 'success');
             } catch (error) {
                 console.log(error);
-                onFeedback("Error al añadir el producto");
+                showAlert("Error al añadir el producto", 'success');
             }
         }
         setIsLoading(false);

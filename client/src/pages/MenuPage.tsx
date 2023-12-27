@@ -7,16 +7,15 @@ import { fetchMenu } from '../services/menu.service';
 import { createOrder, getActiveOrder, addOrderItem } from '../services/table.service';
 import { useQuery } from '../hooks/useQuery';
 import { socket, SocketEvents } from '../utils/socketClient';
+import { useAlert } from '../hooks/useAlert';
 
 import { Global } from '@emotion/react';
 import { styled } from '@mui/material/styles';
 import LinearProgress from '@mui/material/LinearProgress';
-import Snackbar from '@mui/material/Snackbar';
 import {Box} from '@mui/material';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Typography from '@mui/material/Typography';
 
-import AlertComponent from '../components/Shared/AlertComponent';
 import MenuItemComponent from '../components/MenuPage/MenuItemComponent';
 import AppLayout from '../components/Shared/AppLayout';
 import CartComponent from '../components/MenuPage/CartComponent';
@@ -38,26 +37,17 @@ const Puller = styled(Box)(({ theme }) => ({
 }));
 
 export default function MenuPage(){
+    const { showAlert } = useAlert();
     const query = useQuery();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
     const [menu, setMenu] = useState<Menu[]>([]);
-    const [open, setOpen] = useState<boolean>(false);
     const [openCart, setOpenCart] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [tableId] = useState<string | null>(query.get("mesa"));
     const [orderId, setOrderId] = useState<number | null>(null);
     const [cart, setCart] = useState<Cart[]>([]);
     const [itemsOrdered, setItemsOrdered] = useState<OrderItem[]>([]);
     const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
-
-    const handleClose = (_?: SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-    
-        setOpen(false);
-    };
 
     useEffect(() => {
         document.title = `${companyName} | Menu`;
@@ -79,9 +69,8 @@ export default function MenuPage(){
                         setItemsOrdered(items);
                     }
                 }
-            } catch (error: any) {
-                setError((error as Error).message);
-                setOpen(true);
+            } catch (error) {
+                showAlert(`Error ${(error as Error).message}`, 'error')
             }
             setIsLoading(false);
         }
@@ -207,9 +196,6 @@ export default function MenuPage(){
                     <CartComponent cart={cart} isLoading={cartIsLoading} deleteFromCart={deleteFromCart} onOrder={order} orderedItems={itemsOrdered} />
                 </StyledBox>
             </SwipeableDrawer>
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} >
-                <AlertComponent severity='error'>Error: {error}</AlertComponent>
-            </Snackbar>
         </AppLayout>
     )
 }

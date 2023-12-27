@@ -1,44 +1,33 @@
-import { useEffect, useState, SyntheticEvent, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '../models/Table';
 import { fetchTables } from '../services/table.service';
+import { useAlert } from '../hooks/useAlert';
 import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import NativeSelect from '@mui/material/NativeSelect';
 import CircularProgress from '@mui/material/CircularProgress';
-import Snackbar from '@mui/material/Snackbar';
 import AppLayout from '../components/Shared/AppLayout';
-import AlertComponent from '../components/Shared/AlertComponent';
 
 export default function HomePage(){
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
     const [selection, setSelection] = useState<string>("");
     const [tables, setTables] = useState<Table[]>([]);
-    const [open, setOpen] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const selectTable = (event: ChangeEvent<HTMLSelectElement>) => {
         const tableId = event.target.value;
         if (tableId === "0"){
-            setError("Mesa seleccionada no disponible");
-            setOpen(true);
+            showAlert('Mesa seleccionada no disponible', 'warning');
             return;
         }
 
         setSelection(tableId);
         return navigate(`/menu?mesa=${tableId}`, { replace: true })
     }
-
-    const handleClose = (_?: SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') {
-          return;
-        }
-    
-        setOpen(false);
-    };
 
     useEffect(() => {
         document.title = `${companyName} | FOS`;
@@ -48,8 +37,7 @@ export default function HomePage(){
                 const tables = await fetchTables();
                 setTables(tables);
             } catch (error) {
-                setError((error as Error).message);
-                setOpen(true);
+                showAlert('Error con el servidor', 'error');
             }
             setIsLoading(false);
         }
@@ -74,16 +62,12 @@ export default function HomePage(){
                                 name: 'mesa',
                                 id: 'uncontrolled-native',
                             }}
-                            disabled={error !== null}
                             onChange={e => selectTable(e)}>
                                 <option value={0}>Elige...</option>
                                 {tables.map((table) => <option key={table.id} value={table.id}>{table.name}</option>)}
                         </NativeSelect>
                     </FormControl>
                 )}
-                <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} >
-                    <AlertComponent severity='error'>Error: {error}</AlertComponent>
-                </Snackbar>
             </Box>
         </AppLayout>
     )
