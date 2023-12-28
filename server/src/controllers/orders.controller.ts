@@ -24,7 +24,13 @@ export const registerOrder = asyncHandler(async (req: Request, res: Response) =>
             createdAt: new Date(),
             updatedAt: new Date()
         },
-        include: { OrderItems: true },
+        include: { 
+            OrderItems: {
+                include: {
+                    Menu: true
+                }
+            } 
+        },
     });
 
     res.json(order)
@@ -33,7 +39,16 @@ export const registerOrder = asyncHandler(async (req: Request, res: Response) =>
 export const getOrder = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
 
-    const order = await db.order.findUnique({ where: { id }, include: { OrderItems: true } });
+    const order = await db.order.findUnique({ 
+        where: { id }, 
+        include: { 
+            OrderItems: {
+                include: {
+                    Menu: true
+                }
+            } 
+        } 
+    });
 
     res.json(order)
 })
@@ -142,7 +157,11 @@ export const isOrderActive = asyncHandler(async (req: Request, res: Response) =>
             }
         },
         include: {
-            OrderItems: true
+            OrderItems: {
+                include: {
+                    Menu: true
+                }
+            }
         }
     });
 
@@ -166,20 +185,19 @@ export const closeOrder = asyncHandler(async (req: Request, res: Response) => {
         },
         data: {
             status: OrderStatus.userClosed
+        },
+        include: {
+            OrderItems: {
+                include: {
+                    Menu: true
+                }
+            }
         }
     });
 
     if (updated){
         if (emails && emails.length > 0){
-            const items = await db.orderItem.findMany({
-                where: {
-                    orderId
-                },
-                include: {
-                    Menu: true
-                }
-            });
-            await sendTicketEmail(emails, updated, items);
+            await sendTicketEmail(emails, updated, updated.OrderItems);
         }
         res.json({"message": `Order ${orderId} closed sucessfully`})
     }else{
@@ -195,7 +213,11 @@ export const getOrderWithItems = asyncHandler(async (req: Request, res: Response
             id
         },
         include: {
-            OrderItems: true
+            OrderItems: {
+                include: {
+                    Menu: true
+                }
+            }
         }
     })
 
@@ -205,6 +227,11 @@ export const getOrderWithItems = asyncHandler(async (req: Request, res: Response
 export const changeOrderStatusAdmin = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const status = req.params.status
+
+    if (!Object.values(enum_Orders_status).includes(status as enum_Orders_status)){
+        res.status(400);
+        throw new Error(`Unknown status`)
+    }
 
     const updated = await db.order.update({
         where: {

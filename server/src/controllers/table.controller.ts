@@ -1,13 +1,11 @@
 import {Request, Response} from "express";
 import asyncHandler from "express-async-handler";
-import { Prisma } from '@prisma/client'
-import cache from "../utils/cache";
+import { Prisma } from '@prisma/client';
 import db from "../db/client";
 import { genQRCode } from "../utils/generateQRCode";
 
 export const getTables = asyncHandler(async (req: Request, res: Response) => {
     const tables = await db.tables.findMany();
-    cache.set(req.originalUrl, tables);
     res.json(tables);
 })
 
@@ -24,7 +22,6 @@ export const registerTable = asyncHandler(async (req: Request, res: Response) =>
 export const getTable = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const table = await db.tables.findUnique({where: { id }});
-    cache.set(req.originalUrl, table)
     res.json(table)
 })
 
@@ -53,21 +50,30 @@ export const registerMultipleTables = asyncHandler(async (req: Request, res: Res
     const amount = Number(req.params.amount);
     const { url } = req.body;
 
-    let tablesInput: Prisma.TablesCreateInput[] = [];
+    let tables = [];
     for(let i = 1; i <= amount; i++){
         const tableInput: Prisma.TablesCreateInput = {
-            name: `Mesa ${i}`,
-            qrcode: await genQRCode(`${url}?mesa=${i}`),
             createdAt: new Date(),
             updatedAt: new Date()
         };
 
-        tablesInput.push(tableInput);
+        const table = await db.tables.create({ data: tableInput });
+        tables.push(table);
     }
 
-    const tables = await db.tables.createMany({ data: tablesInput });
+    const updatedTables = await Promise.all(tables.map(async (table) => {
+        return await db.tables.update({
+            where: {
+                id: table.id
+            }, 
+            data: {
+                name: `Mesa ${table.id}`,
+                qrcode: await genQRCode(`${url}?menu=${table.id}`)
+            }
+        })
+    }))
 
-    res.json(tables);
+    res.json(updatedTables);
 })
 
 export const deleteAllTables = asyncHandler(async (req: Request, res: Response) => {

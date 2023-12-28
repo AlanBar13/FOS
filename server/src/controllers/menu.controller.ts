@@ -21,14 +21,11 @@ export const getMenuItems = asyncHandler(async (req: Request, res: Response) => 
 })
 
 export const registerMenuItem = asyncHandler(async (req: Request, res: Response) => {
-    const payload = req.body;
+    const payload: Prisma.MenuCreateInput = req.body;
 
     const menuItem = await db.menu.create({
         data: {
-            name: payload.name,
-            description: payload.description,
-            price: payload.price,
-            available: payload.available,
+            ...payload,
             createdAt: new Date(),
             updatedAt: new Date()
         }
