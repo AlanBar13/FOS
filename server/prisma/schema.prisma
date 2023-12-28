@@ -35,22 +35,23 @@ model OrderItem {
 }
 
 model Order {
-  id         Int                @id @default(autoincrement())
-  tableId    Int
-  subtotal   Float              @default(0)
-  taxTotal   Float              @default(0)
-  total      Float              @default(0)
-  status     enum_Orders_status @default(created)
-  email      String?            @db.VarChar(255)
-  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime?          @db.Timestamptz(6)
-  tips       Float              @default(0)
-  OrderItems OrderItem[]
+  id           Int                @id @default(autoincrement())
+  tableId      Int
+  subtotal     Float              @default(0)
+  taxTotal     Float              @default(0)
+  total        Float              @default(0)
+  status       enum_Orders_status @default(created)
+  email        String?            @db.VarChar(255)
+  createdAt    DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime?          @db.Timestamptz(6)
+  tips         Float              @default(0)
+  OrderItems   OrderItem[]
+  KitchenQueue KitchenQueue[]
 }
 
 model Tables {
   id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(255)
+  name      String?   @db.VarChar(255)
   location  String?   @db.VarChar(255)
   qrcode    String?
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
@@ -64,6 +65,24 @@ model Users {
   role      enum_Users_role @default(viewer)
   createdAt DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt DateTime?       @db.Timestamptz(6)
+}
+
+model KitchenQueue {
+  uuid        String              @id @default(uuid())
+  orderId     Int
+  tableId     Int
+  status      enum_Kitchen_Status @default(ordered)
+  ready       Boolean
+  orderedAt   DateTime            @default(now())
+  inKitchenAt DateTime?           @db.Timestamptz(6)
+  doneAt      DateTime?           @db.Timestamptz(6)
+  Order       Order               @relation(fields: [orderId], references: [id])
+}
+
+enum enum_Kitchen_Status {
+  ordered
+  preparing
+  done
 }
 
 enum enum_OrderItems_status {
