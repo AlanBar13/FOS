@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import _ from 'lodash';
 import { Cart } from "../../models/Cart";
 import { formatPriceFixed } from "../../utils/numbers";
-import { OrderItem } from '../../models/OrderItem';
+import { RawOrderItem } from '../../models/Order';
 
 import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
@@ -14,7 +14,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 interface CartComponentProps {
     cart: Cart[]
     isLoading: boolean
-    orderedItems?: OrderItem[]
+    orderedItems?: RawOrderItem[]
     deleteFromCart: (index: number) => void
     onOrder: () => void
 }

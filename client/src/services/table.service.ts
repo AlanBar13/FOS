@@ -1,6 +1,6 @@
 import { api } from "../utils/apiClient";
 import { Table } from "../models/Table";
-import { Order } from "../models/Order";
+import { Order, RawOrder, RawOrderItem } from "../models/Order";
 import { AxiosResponse } from "axios";
 import { OrderItem } from "../models/OrderItem";
 
@@ -16,14 +16,14 @@ export const deleteTables = async (): Promise<AxiosResponse> => {
     return await api.delete(`/admin/table/destroy`);
 }
 
-export const getActiveOrder = async (tableId: string): Promise<AxiosResponse> => {
-    return await api.get(`/table/${tableId}/order`);
+export async function getActiveOrder(tableId: string): Promise<RawOrder> {
+    return (await api.get(`/table/${tableId}/order`)).data as RawOrder;
 }
 
 export const createOrder = async (tableId: string): Promise<Order> => {
     return (await api.post(`/table/${tableId}/order`)).data;
 }
 
-export const addOrderItem = async (tableId: string, order: number, item: OrderItem): Promise<AxiosResponse> => {
-    return await api.post(`/table/${tableId}/order/${order}/add`, item);
+export const addOrderItem = async (tableId: string, order: number, item: OrderItem): Promise<RawOrderItem> => {
+    return (await api.post(`/table/${tableId}/order/${order}/add`, item)).data as RawOrderItem;
 }

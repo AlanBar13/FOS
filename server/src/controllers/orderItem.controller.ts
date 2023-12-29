@@ -38,8 +38,7 @@ export const registerOrderItem = asyncHandler(async (req: Request, res: Response
     payload.status = ItemStatus.ordered;
     const item = await db.orderItem.create({
         data: {
-            ...payload,
-            updatedAt: new Date()
+            ...payload
         },
         include: {
             Menu: true

@@ -7,14 +7,16 @@ export type RawOrder = {
     tips: number
     status: string
     email: string
+    OrderItems?: RawOrderItem
     createdAt: string
     updatedAt: string
 }
 
 export type RawMenu = {
+    id: number
     name: string
     price: number
-    tax: number
+    tax: number | null
 }
 
 export type RawOrderItem = {

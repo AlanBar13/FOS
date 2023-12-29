@@ -7,7 +7,7 @@ export interface OrderItem {
     qty: number
     comments?: string
     status?: string
-    Menu: Menu
+    Menu?: Menu
     createdAt?: Date
     updatedAt?: Date
     deletedAt?: Date

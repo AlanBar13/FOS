@@ -1,10 +1,10 @@
-import {useState, useEffect, SyntheticEvent} from 'react';
+import { useState, useEffect } from 'react';
 import { Menu } from '../models/Menu';
 import { Cart } from '../models/Cart';
-import { OrderItem } from '../models/OrderItem';
+import { RawOrderItem } from '../models/Order';
 import { AddToDashboardItems } from '../models/SocketModels';
 import { fetchMenu } from '../services/menu.service';
-import { createOrder, getActiveOrder, addOrderItem } from '../services/table.service';
+import { createOrder, addOrderItem, getActiveOrder } from '../services/table.service';
 import { useQuery } from '../hooks/useQuery';
 import { socket, SocketEvents } from '../utils/socketClient';
 import { useAlert } from '../hooks/useAlert';
@@ -46,7 +46,7 @@ export default function MenuPage(){
     const [tableId] = useState<string | null>(query.get("mesa"));
     const [orderId, setOrderId] = useState<number | null>(null);
     const [cart, setCart] = useState<Cart[]>([]);
-    const [itemsOrdered, setItemsOrdered] = useState<OrderItem[]>([]);
+    const [itemsOrdered, setItemsOrdered] = useState<RawOrderItem[]>([]);
     const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -54,21 +54,13 @@ export default function MenuPage(){
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                if(tableId !== null){
+                    const order = await getActiveOrder(tableId);
+                    setOrderId(order.id);
+                }
+
                 const menu = await fetchMenu();
                 setMenu(menu);
-                if (tableId){
-                    const getOrder = await getActiveOrder(tableId);
-                    if (getOrder.data.orderId == null){
-                        setIsLoading(false);
-                        return;
-                    }
-                    const order = getOrder.data.orderId as number;
-                    setOrderId(order);
-                    const items = getOrder.data.items as OrderItem[];
-                    if (items.length > 0){
-                        setItemsOrdered(items);
-                    }
-                }
             } catch (error) {
                 showAlert(`Error ${(error as Error).message}`, 'error')
             }
@@ -77,6 +69,41 @@ export default function MenuPage(){
 
         fetchData();
     }, []);
+
+    const addItemToCart = async (orderIdToUpdate: number) => {
+        if (tableId == null){
+            showAlert("No se puede agregar al carrito falta mesa", "error");
+            return;
+        }
+
+        let newItems: AddToDashboardItems[] = [];
+        await Promise.all(
+            cart.map(async (crt) => {
+                try {
+                    const newOrderItem = await addOrderItem(tableId, orderIdToUpdate, {
+                        menuId: crt.item.id!,
+                        qty: crt.qty,
+                        //TODO: add comments
+                    });
+                    console.log(newOrderItem);
+                    newItems.push({
+                        orderItemId: newOrderItem.id,
+                        id: newOrderItem.Menu.id,
+                        name: newOrderItem.Menu.name,
+                        price: newOrderItem.Menu.price,
+                        amount: newOrderItem.qty,
+                        status: newOrderItem.status,
+                        total: newOrderItem.qty * newOrderItem.Menu.price 
+                    });
+                    setItemsOrdered([...itemsOrdered, newOrderItem]);
+                } catch (error) {
+                    console.log(error)
+                }
+            })
+        );
+
+        socket.emit(SocketEvents.clientSendOrder, orderIdToUpdate, Number(tableId), newItems)
+    }
 
     const addToCart = (item: Menu, qty: number) => {
         setCart([...cart, { qty, item, total: qty * item.price }]);
@@ -100,39 +127,12 @@ export default function MenuPage(){
             try {
                 const orderCreated = await createOrder(tableId);
                 setOrderId(orderCreated.id);
+                await addItemToCart(orderCreated.id);
             } catch (error) {
                 console.log(error)
             }
-        }
-
-        let newItems: AddToDashboardItems[] = [];
-
-        if (orderId !== null){
-            await Promise.all(
-                cart.map(async (crt) => {
-                    try {
-                        const newOrderItem = await addOrderItem(tableId, orderId!, {
-                            menuId: crt.item.id!,
-                            qty: crt.qty,
-                            //TODO: add comments
-                        });
-                        const newItem = newOrderItem.data.item as OrderItem;
-                        newItem.Menu = newOrderItem.data.menu as Menu;
-                        newItems.push({
-                            orderItemId: newItem.id!,
-                            id: crt.item.id!,
-                            name: crt.item.name,
-                            price: crt.item.price,
-                            amount: crt.qty,
-                            total: crt.total 
-                        });
-                        setItemsOrdered([...itemsOrdered, newItem]);
-                    } catch (error) {
-                        console.log(error)
-                    }
-                })
-            );
-            socket.emit(SocketEvents.clientSendOrder, orderId, Number(tableId), newItems)
+        }else{
+            await addItemToCart(orderId);
         }
 
         setCart([]);

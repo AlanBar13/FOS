@@ -22,16 +22,17 @@ model Menu {
 }
 
 model OrderItem {
-  id        Int                    @id @default(autoincrement())
-  orderId   Int
-  menuId    Int
-  qty       Int                    @default(1)
-  comments  String?                @db.VarChar(255)
-  status    enum_OrderItems_status
-  createdAt DateTime               @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime?              @db.Timestamptz(6)
-  Menu      Menu                   @relation(fields: [menuId], references: [id])
-  Order     Order                  @relation(fields: [orderId], references: [id])
+  id          Int                     @id @default(autoincrement())
+  orderId     Int
+  menuId      Int
+  qty         Int                     @default(1)
+  comments    String?                 @db.VarChar(255)
+  status      enum_OrderItems_status  @default(ordered)
+  createdAt   DateTime                @default(now()) @db.Timestamptz(6)
+  inKitchenAt DateTime?               @db.Timestamptz(6)
+  doneAt      DateTime?               @db.Timestamptz(6)
+  Menu        Menu                    @relation(fields: [menuId], references: [id])
+  Order       Order                   @relation(fields: [orderId], references: [id])
 }
 
 model Order {
@@ -46,7 +47,6 @@ model Order {
   updatedAt    DateTime?          @db.Timestamptz(6)
   tips         Float              @default(0)
   OrderItems   OrderItem[]
-  KitchenQueue KitchenQueue[]
 }
 
 model Tables {
@@ -65,24 +65,6 @@ model Users {
   role      enum_Users_role @default(viewer)
   createdAt DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt DateTime?       @db.Timestamptz(6)
-}
-
-model KitchenQueue {
-  uuid        String              @id @default(uuid())
-  orderId     Int
-  tableId     Int
-  status      enum_Kitchen_Status @default(ordered)
-  ready       Boolean
-  orderedAt   DateTime            @default(now())
-  inKitchenAt DateTime?           @db.Timestamptz(6)
-  doneAt      DateTime?           @db.Timestamptz(6)
-  Order       Order               @relation(fields: [orderId], references: [id])
-}
-
-enum enum_Kitchen_Status {
-  ordered
-  preparing
-  done
 }
 
 enum enum_OrderItems_status {

@@ -11,6 +11,6 @@ router.route("/:tableId/order/:orderId/update").patch(updateOrder);
 router.route("/:tableId/order/:orderId/add").post(registerOrderItem);
 router.route("/:tableId/order/:orderId/submit").post(submitOrderToKitchen);
 router.route("/:tableId/order/:orderId/close").post(closeOrder);
-router.route("/").get(verifyCache, getTables);
+router.route("/").get(getTables);
 
 export default router;
