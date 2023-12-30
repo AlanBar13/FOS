@@ -1,4 +1,5 @@
-import { OrderItem } from "../../../models/OrderAdapter";
+import { RawOrderItem } from "../../../models/Order";
+import { formatPriceFixed } from "../../../utils/numbers";
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface OrderItemTableComponentProps {
-    items?: OrderItem[]
+    items?: RawOrderItem[]
 }
 export default function OrderItemTableComponent({ items = [] }: OrderItemTableComponentProps){
     return (
@@ -33,12 +34,12 @@ export default function OrderItemTableComponent({ items = [] }: OrderItemTableCo
                 <TableBody>
                     {items.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.menuName}</TableCell>
+                            <TableCell>{item.Menu.name}</TableCell>
                             <TableCell>{item.status}</TableCell>
                             <TableCell>{item.qty}</TableCell>
-                            <TableCell>{item.menuPrice}</TableCell>
-                            <TableCell>{item.menuTax}</TableCell>
-                            <TableCell>{item.total}</TableCell>
+                            <TableCell>{formatPriceFixed(item.Menu.price)}</TableCell>
+                            <TableCell>{formatPriceFixed(item.Menu.tax ?? 0)}</TableCell>
+                            <TableCell>{item.Menu.tax !== null ? (formatPriceFixed((item.Menu.price + item.Menu.tax) * item.qty)): (formatPriceFixed(item.Menu.price * item.qty))}</TableCell>
                             <TableCell>
                                 <IconButton>
                                     <EditIcon />

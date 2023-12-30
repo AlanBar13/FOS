@@ -7,7 +7,7 @@ export type RawOrder = {
     tips: number
     status: string
     email: string
-    OrderItems?: RawOrderItem
+    OrderItems?: RawOrderItem[]
     createdAt: string
     updatedAt: string
 }

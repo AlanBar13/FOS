@@ -24,7 +24,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
 
     // More socket logic
     socket.on("sendOrder", async (order_id: number, table_id: number, items: AddToDashboardItems[]) => {
-        logger.info(`socket called args ${order_id}, ${table_id} ${JSON.stringify(items)}`)
+        logger.info(`OrderSent order: ${order_id}, table: ${table_id} `)
         try {
             const currentOrder = await db.order.findUnique({ where : { id: order_id }});
 
@@ -60,7 +60,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
     });
 
     socket.on("orderUpdate", async (dashboardItem: DashboardItems) => {
-        console.log("orderUpdate", dashboardItem)
+        console.log("orderUpdate", dashboardItem.id)
         try {
             if (!dashboardItem.items || dashboardItem.items.length === 0){
                 throw new Error(`No items sent`);
@@ -98,7 +98,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
     });
 
     socket.on("orderReady", async (dashboardItem: DashboardItems) => {
-        console.log("orderReady", dashboardItem)
+        console.log("orderReady", dashboardItem.id)
         try {
             if (!dashboardItem.items || dashboardItem.items.length === 0){
                 throw new Error(`No items sent`);
