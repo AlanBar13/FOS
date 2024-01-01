@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.9"
+  },
   "scripts": {
     "install:client": "cd ./client && npm install",
     "install:server": "cd ./server && npm install",
