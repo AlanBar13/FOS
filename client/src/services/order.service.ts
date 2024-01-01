@@ -1,7 +1,7 @@
 import { api } from "../utils/apiClient";
-import { GetOrder, Order } from '../models/Order';
+import { GetOrder, RawOrder } from '../models/Order';
 
-export const fetchOrders = async () : Promise<Order[]> => {
+export const fetchOrders = async () : Promise<RawOrder[]> => {
     return (await api.get('/admin/order')).data;
 }
 

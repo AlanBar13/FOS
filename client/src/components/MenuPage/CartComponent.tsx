@@ -36,7 +36,7 @@ export default function CartComponent({ cart, isLoading = false, orderedItems = 
         });
 
         return total;
-    }, [cart]);
+    }, [cart, orderedItems]);
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between'}}>

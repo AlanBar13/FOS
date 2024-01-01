@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Order } from '../../models/Order';
+import { RawOrder } from '../../models/Order';
 import { fetchOrders } from '../../services/order.service';
 
 import AdminAppBarComponent from './Shared/AdminAppBarComponent';
 import OrdersDataComponent from './Orders/OrdersDataComponent';
 
 export default function OrdersComponent(){
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<RawOrder[]>([]);
 
     useEffect(() => {
         const getData = async () => {
@@ -22,7 +22,7 @@ export default function OrdersComponent(){
         getData();
     }, []);
 
-    const replaceList = (newList: Order[]) => {
+    const replaceList = (newList: RawOrder[]) => {
         setOrders(newList);
     }
 

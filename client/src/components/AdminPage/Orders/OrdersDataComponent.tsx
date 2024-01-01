@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Order } from '../../../models/Order';
+import { RawOrder } from '../../../models/Order';
 import { Order as TableOrder, createCompareFn } from '../../../utils/tableUtils';
 
 import Table from '@mui/material/Table';
@@ -18,12 +18,12 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import Tooltip from '@mui/material/Tooltip';
 
 import { formatPriceFixed } from '../../../utils/numbers';
-import { formatDate } from '../../../utils/dates';
+import { formatStringDate } from '../../../utils/dates';
 import { OrderStatus } from '../../../utils/constants';
 
 interface OrdersDataComponentProps {
-    orders: Order[]
-    onTableChange: (orders: Order[]) => void
+    orders: RawOrder[]
+    onTableChange: (orders: RawOrder[]) => void
     // onEditClicked: (id: number) => void
     // onDeleteClicked: (id: number) => void
 }
@@ -68,7 +68,7 @@ const properties = [
 export default function OrdersDataComponent({ orders, onTableChange }: OrdersDataComponentProps) {
     const navigate = useNavigate();
     const [order, setOrder] = useState<TableOrder>('asc');
-    const [orderBy, setOrderBy] = useState<keyof Order>('id');
+    const [orderBy, setOrderBy] = useState<keyof RawOrder>('id');
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [page, setPage] = useState(0);
 
@@ -76,7 +76,7 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
         return orders.sort(createCompareFn(orderBy, order)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     }, [orders, page, rowsPerPage])
 
-    const handleSort = (property: keyof Order) => {
+    const handleSort = (property: keyof RawOrder) => {
         const isAsc = orderBy === property && order =='asc';
         setOrder(isAsc ? 'desc': 'asc');
         setOrderBy(property);
@@ -158,12 +158,12 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
                     <TableHead>
                         <TableRow>
                             {properties.map(property => (
-                                <TableCell key={property.name} sortDirection={orderBy === property.name as keyof Order ? order : false}>
+                                <TableCell key={property.name} sortDirection={orderBy === property.name as keyof RawOrder ? order : false}>
                                     {property.noSort ? property.displayName.toLocaleUpperCase() : (
                                         <TableSortLabel 
-                                            active={orderBy === property.name as keyof Order}
-                                            direction={orderBy === property.name as keyof Order ? order : 'asc'}
-                                            onClick={() => handleSort(property.name as keyof Order)}>
+                                            active={orderBy === property.name as keyof RawOrder}
+                                            direction={orderBy === property.name as keyof RawOrder ? order : 'asc'}
+                                            onClick={() => handleSort(property.name as keyof RawOrder)}>
                                             {property.displayName.toLocaleUpperCase()}
                                         </TableSortLabel>
                                     )}
@@ -183,8 +183,8 @@ export default function OrdersDataComponent({ orders, onTableChange }: OrdersDat
                                 <TableCell>{formatPriceFixed(item.taxTotal ? item.taxTotal : 0)}</TableCell>
                                 <TableCell>{formatPriceFixed(item.total)}</TableCell>
                                 <TableCell><Chip sx={{ background: getOrderStatusColor(item.status).color}} label={`${getOrderStatusColor(item.status).name}`} /></TableCell>
-                                <TableCell>{formatDate(item.createdAt)}</TableCell>
-                                <TableCell>{formatDate(item.updatedAt)}</TableCell>
+                                <TableCell>{formatStringDate(item.createdAt)}</TableCell>
+                                <TableCell>{formatStringDate(item.updatedAt)}</TableCell>
                                 <TableCell>
                                     <Tooltip title={`Ver orden ${item.id}`}>
                                         <IconButton onClick={() => onSeeButtonClicked(item.id)}>
