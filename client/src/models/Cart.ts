@@ -1,7 +1,14 @@
-import { Menu } from "./Menu"
+import { RawMenu } from "./Order"
 
 export interface Cart {
     qty: number
-    item: Menu
+    item: RawMenu
+    total: number
+}
+
+export interface OrderedItems {
+    menuId: string
+    qty: number
+    name: string
     total: number
 }

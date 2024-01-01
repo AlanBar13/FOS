@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Menu } from '../models/Menu';
 import { Cart } from '../models/Cart';
-import { RawOrderItem } from '../models/Order';
+import { RawMenu, RawOrderItem } from '../models/Order';
 import { AddToDashboardItems } from '../models/SocketModels';
 import { fetchMenu } from '../services/menu.service';
 import { createOrder, addOrderItem, getActiveOrder } from '../services/table.service';
@@ -40,7 +39,7 @@ export default function MenuPage(){
     const { showAlert } = useAlert();
     const query = useQuery();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
-    const [menu, setMenu] = useState<Menu[]>([]);
+    const [menu, setMenu] = useState<RawMenu[]>([]);
     const [openCart, setOpenCart] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [tableId] = useState<string | null>(query.get("mesa"));
@@ -57,6 +56,9 @@ export default function MenuPage(){
                 if(tableId !== null){
                     const order = await getActiveOrder(tableId);
                     setOrderId(order.id);
+                    if(order.OrderItems){
+                        setItemsOrdered(order.OrderItems);
+                    }
                 }
 
                 const menu = await fetchMenu();
@@ -77,11 +79,12 @@ export default function MenuPage(){
         }
 
         let newItems: AddToDashboardItems[] = [];
+        let newItemsOrdered: RawOrderItem[] = [];
         await Promise.all(
             cart.map(async (crt) => {
                 try {
                     const newOrderItem = await addOrderItem(tableId, orderIdToUpdate, {
-                        menuId: crt.item.id!,
+                        menuId: crt.item.id,
                         qty: crt.qty,
                         //TODO: add comments
                     });
@@ -95,17 +98,21 @@ export default function MenuPage(){
                         status: newOrderItem.status,
                         total: newOrderItem.qty * newOrderItem.Menu.price 
                     });
-                    setItemsOrdered([...itemsOrdered, newOrderItem]);
+                    newItemsOrdered.push(newOrderItem);
                 } catch (error) {
                     console.log(error)
                 }
             })
         );
 
+        if (newItemsOrdered.length > 0){
+            setItemsOrdered([...itemsOrdered, ...newItemsOrdered]);
+        }
+
         socket.emit(SocketEvents.clientSendOrder, orderIdToUpdate, Number(tableId), newItems)
     }
 
-    const addToCart = (item: Menu, qty: number) => {
+    const addToCart = (item: RawMenu, qty: number) => {
         setCart([...cart, { qty, item, total: qty * item.price }]);
         setOpenCart(true);
     }
@@ -129,7 +136,7 @@ export default function MenuPage(){
                 setOrderId(orderCreated.id);
                 await addItemToCart(orderCreated.id);
             } catch (error) {
-                console.log(error)
+                showAlert(`Error ${error}`, "error");
             }
         }else{
             await addItemToCart(orderId);
@@ -142,6 +149,18 @@ export default function MenuPage(){
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpenCart(newOpen);
     };
+
+    //TODO: Improve this function
+    // const orderAndGroupItems = (orderedItems: RawOrderItem[]): OrderedItems[] => {
+    //     const grouped = lodash.groupBy(orderedItems, 'menuId');
+    //     const flatten: OrderedItems[] = lodash.map(grouped, (items, id) => ({
+    //         menuId: id,
+    //         name: lodash.map(items, 'Menu.name')[0],
+    //         qty: lodash.sumBy(items, 'qty'),
+    //         total: lodash.sumBy(items, 'Menu.price') * lodash.sumBy(items, 'qty')
+    //     }));
+    //     return flatten;
+    // }
 
     return (
         <AppLayout companyName={`${companyName} | Menu`}>

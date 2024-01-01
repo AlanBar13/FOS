@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu } from '../../models/Menu';
+import { RawMenu } from '../../models/Order';
 import {Box} from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -10,8 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 
 interface MenuItemComponentProps {
-    item: Menu
-    onAddClicked: (item: Menu, qty: number) => void
+    item: RawMenu
+    onAddClicked: (item: RawMenu, qty: number) => void
 }
 
 export default function MenuItemComponent({ item, onAddClicked }: MenuItemComponentProps){

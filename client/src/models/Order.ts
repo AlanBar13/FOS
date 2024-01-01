@@ -17,6 +17,12 @@ export type RawMenu = {
     name: string
     price: number
     tax: number | null
+    available: boolean
+    description: string | null
+    img: string | null
+    category: string
+    createdAt: string
+    updatedAt: string
 }
 
 export type RawOrderItem = {
@@ -27,6 +33,12 @@ export type RawOrderItem = {
     comments: string | null
     status: string
     Menu: RawMenu
+}
+
+export type AddItemToOrder = {
+    menuId: number
+    qty: number,
+    comments?: string | null
 }
 
 export type OrderItem = {
@@ -40,6 +52,7 @@ export type OrderItem = {
     orderId: number
     qty: number
     status: string
+    Menu?: RawMenu
 }
 
 export type Order = {

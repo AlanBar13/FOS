@@ -1,8 +1,9 @@
 import { AxiosResponse } from 'axios'
 import { api } from "../utils/apiClient";
 import { Menu } from "../models/Menu";
+import { RawMenu } from '../models/Order';
 
-export const fetchMenu = async () : Promise<Menu[]> => {
+export const fetchMenu = async () : Promise<RawMenu[]> => {
     return (await api.get('/menu?onlyAvailable=true')).data;
 }
 

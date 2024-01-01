@@ -68,7 +68,7 @@ export default function CartComponent({ cart, isLoading = false, orderedItems = 
                         {orderedItems.map((item, index) => (
                             <Box key={index} sx={{display: 'flex', flexDirection: 'row'}}>
                                 <Typography sx={{paddingTop: '0.55rem'}} fontSize={13}>
-                                    {item.qty}x - {item.Menu?.name} - {formatPriceFixed(item.Menu!.price * item.qty)}
+                                    {item.qty}x - {item.Menu.name} - {formatPriceFixed(item.Menu.price * item.qty)}
                                 </Typography>
                             </Box>
                         ))}
