@@ -1,5 +1,7 @@
 import * as dotenv from "dotenv";
-dotenv.config();
+import path from 'path';
+const rootPath = path.join(__dirname, '../../../.env.local');
+dotenv.config({path: rootPath});
 
 export default {
     mode: process.env.MODE,
