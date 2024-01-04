@@ -1,4 +1,4 @@
-import { RawOrderItem } from "../../../models/Order";
+import { RawOrderItem, getOrderItemStatusString } from "../../../models/Order";
 import { formatPriceFixed } from "../../../utils/numbers";
 
 import Table from '@mui/material/Table';
@@ -35,7 +35,7 @@ export default function OrderItemTableComponent({ items = [] }: OrderItemTableCo
                     {items.map(item => (
                         <TableRow key={item.id}>
                             <TableCell>{item.Menu.name}</TableCell>
-                            <TableCell>{item.status}</TableCell>
+                            <TableCell>{getOrderItemStatusString(item.status)}</TableCell>
                             <TableCell>{item.qty}</TableCell>
                             <TableCell>{formatPriceFixed(item.Menu.price)}</TableCell>
                             <TableCell>{formatPriceFixed(item.Menu.tax ?? 0)}</TableCell>

@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { RawOrder, getOrderStatusSring } from '../../../models/Order';
-import { useApi } from '../../../hooks/useApi';
+import { RawOrder, UpdateOrder, getOrderStatusSring } from '../../../models/Order';
+import { useAlert } from '../../../hooks/useAlert';
+import { updateOrder, fetchOrder } from '../../../services/order.service';
 import { formatPriceFixed } from '../../../utils/numbers';
 import { formatStringDate } from '../../../utils/dates';
 import OrderItemTableComponent from './OrderItemTableComponent';
@@ -15,10 +17,43 @@ import "./OrderPreviewComponent.css"
 
 export default function OrderPreviewComponent() {
     const { id } = useParams();
-    const { data, isLoading, error } = useApi<RawOrder>({ 
-        route: `/admin/order/${id}`, 
-        method: "GET"
-    });
+    const { showAlert } = useAlert();
+    const [isLoading, setisLoading] = useState(false);
+    const [data, setData] = useState<RawOrder | null>(null);
+
+    useEffect(() => {
+        const getData = async () => {
+            try {
+                if (id == null){
+                    return;
+                }
+
+                const order = await fetchOrder(id);
+                setData(order);
+            } catch (error) {
+                showAlert(`Error: ${(error as Error).message}`, 'error');
+            }
+        }
+
+        getData();
+    }, [])
+
+    const onUpdateOrder = async (updatedOrder: UpdateOrder) => {
+        if (id == null){
+            return;
+        }
+
+        setisLoading(true);
+        try {
+            const newOrder = await updateOrder(id, updatedOrder);
+            if (data){
+                setData({...data, status: newOrder.status, tips: newOrder.tips})
+            }
+        } catch (error) {
+            showAlert(`Error: ${(error as Error).message}`, 'error');
+        }
+        setisLoading(false);
+    }
 
     return (
         <>
@@ -50,7 +85,11 @@ export default function OrderPreviewComponent() {
                             </div>
                         </Paper>
                         <Divider sx={{ margin: '1rem' }} flexItem />
-                        <OrderPreviewFormComponent orderStatus={data.status} />
+                        {isLoading ? (
+                            <CircularProgress />
+                        ) : (
+                            <OrderPreviewFormComponent orderStatus={data.status} tips={data.tips} UpdateOrder={onUpdateOrder} />
+                        )}
                         <Divider sx={{ margin: '1rem' }} flexItem />
                         {data.OrderItems && data.OrderItems.length > 0 ? (
                             <OrderItemTableComponent items={data.OrderItems} />
@@ -63,7 +102,6 @@ export default function OrderPreviewComponent() {
                         <Typography>
                             Orden No disponible
                         </Typography>
-                        {error}
                     </div>
                 )
             )} 

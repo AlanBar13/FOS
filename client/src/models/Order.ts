@@ -41,6 +41,11 @@ export type AddItemToOrder = {
     comments?: string | null
 }
 
+export type UpdateOrder = {
+    status: string
+    tips: number
+}
+
 export type OrderItem = {
     menuName: string
     menuPrice: string
