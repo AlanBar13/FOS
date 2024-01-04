@@ -5,7 +5,7 @@ import db from "../db/client";
 import { genQRCode } from "../utils/generateQRCode";
 
 export const getTables = asyncHandler(async (req: Request, res: Response) => {
-    const tables = await db.tables.findMany();
+    const tables = await db.tables.findMany({ orderBy: { id: 'asc' }});
     res.json(tables);
 })
 

@@ -10,7 +10,7 @@ import { excludeFields } from "../db/utils";
 const select = excludeFields<Prisma.OrderFieldRefs>(db.order.fields, ["email"]);
 
 export const getOrders = asyncHandler(async (req: Request, res: Response) => {
-    const orders = await db.order.findMany();
+    const orders = await db.order.findMany({ orderBy: { id: 'desc' }});
 
     res.json(orders)
 })

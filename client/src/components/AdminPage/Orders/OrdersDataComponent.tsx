@@ -24,8 +24,6 @@ import { OrderStatus } from '../../../utils/constants';
 interface OrdersDataComponentProps {
     orders: RawOrder[]
     onTableChange: (orders: RawOrder[]) => void
-    // onEditClicked: (id: number) => void
-    // onDeleteClicked: (id: number) => void
 }
 
 const properties = [
@@ -67,7 +65,7 @@ const properties = [
 
 export default function OrdersDataComponent({ orders, onTableChange }: OrdersDataComponentProps) {
     const navigate = useNavigate();
-    const [order, setOrder] = useState<TableOrder>('asc');
+    const [order, setOrder] = useState<TableOrder>('desc');
     const [orderBy, setOrderBy] = useState<keyof RawOrder>('id');
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [page, setPage] = useState(0);
