@@ -1,33 +1,47 @@
 import { DashboardItems } from "../types";
+import _ from "lodash";
 
+type QueueType = "toPrepare" | "inKitchen";
+
+//TODO: save this to db ex. Mongo/Redis
 class KitchenQueue {
-    private items: DashboardItems[] = [];
+    private ordersToPrepare: DashboardItems[] = [];
+    private ordersInKitchen: DashboardItems[] = [];
 
-    add(item: DashboardItems): void {
-        if (!this.items.some(existing => existing.id === item.id)) {
-            this.items.push(item);
+    addToQueue(item: DashboardItems): void {
+        if (!this.has(item, "toPrepare") && !this.has(item, "inKitchen")) {
+            this.ordersToPrepare.push(item);
         }
+        console.log('preparing', this.ordersToPrepare);
+        console.log('kitchen', this.ordersInKitchen);
     }
 
-    delete(item: DashboardItems): void {
-        if (this.items.some(existing => existing.id === item.id)){
-            this.items.filter(item => item.id !== item.id);
+    moveToKitchen(item: DashboardItems): void {
+        if (this.has(item, "toPrepare")){
+            _.remove(this.ordersToPrepare, (it) => it.id === item.id)
         }
-    }
 
-    update(item: DashboardItems): void {
-        if (this.items.some(existing => existing.id === item.id)){
-            this.items.filter(item => item.id !== item.id);
-            this.items.push(item);
+        if(!this.has(item, "inKitchen")){
+            this.ordersInKitchen.push(item);
         }
+        console.log('preparing', this.ordersToPrepare);
+        console.log('kitchen', this.ordersInKitchen);
     }
 
-    has(item: DashboardItems): boolean {
-        return this.items.some(existing => existing.id === item.id);
+    orderReady(item: DashboardItems): void {
+        if(this.has(item, "inKitchen")){
+             _.remove(this.ordersInKitchen, (it) => it.id === item.id);
+        }
+        console.log('preparing', this.ordersToPrepare);
+        console.log('kitchen', this.ordersInKitchen);
     }
 
-    values(): DashboardItems[] {
-        return [...this.items];
+    has(item: DashboardItems, type: QueueType): boolean {
+        return type === "toPrepare" ? this.ordersToPrepare.some(existing => existing.id === item.id) : this.ordersInKitchen.some(existing => existing.id === item.id);
+    }
+
+    values(type: QueueType): DashboardItems[] {
+        return type === "toPrepare" ? [...this.ordersToPrepare] : [...this.ordersInKitchen];
     }
 }
 

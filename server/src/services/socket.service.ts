@@ -49,7 +49,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
                     orderStatus: OrderStatus.ordering,
                     items
                 }
-                kitchenQueue.add(dashboardItem);
+                kitchenQueue.addToQueue(dashboardItem);
                 io.emit("dashboardOrderServer", dashboardItem);
             }else{
                 throw new Error(`Order could not be updated`)
@@ -90,7 +90,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
             dashboardItem.orderStatus = OrderStatus.inKitchen;
             const updatedItems = dashboardItem.items.map((item) => ({...item, status: ItemStatus.inProgress}));
             dashboardItem.items = updatedItems;
-            kitchenQueue.update(dashboardItem);
+            kitchenQueue.moveToKitchen(dashboardItem);
             io.emit("orderUpdateServer", dashboardItem);
         } catch (error) {
             logger.error(`[Socket] ${error}`);
@@ -124,7 +124,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
                 })
             }))
 
-            kitchenQueue.delete(dashboardItem);
+            kitchenQueue.orderReady(dashboardItem);
             dashboardItem.orderStatus = OrderStatus.served;
             const updatedItems = dashboardItem.items.map((item) => ({...item, status: ItemStatus.done}));
             dashboardItem.items = updatedItems;
