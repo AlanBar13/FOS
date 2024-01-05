@@ -12,8 +12,6 @@ class KitchenQueue {
         if (!this.has(item, "toPrepare") && !this.has(item, "inKitchen")) {
             this.ordersToPrepare.push(item);
         }
-        console.log('preparing', this.ordersToPrepare);
-        console.log('kitchen', this.ordersInKitchen);
     }
 
     moveToKitchen(item: DashboardItems): void {
@@ -24,16 +22,12 @@ class KitchenQueue {
         if(!this.has(item, "inKitchen")){
             this.ordersInKitchen.push(item);
         }
-        console.log('preparing', this.ordersToPrepare);
-        console.log('kitchen', this.ordersInKitchen);
     }
 
     orderReady(item: DashboardItems): void {
         if(this.has(item, "inKitchen")){
              _.remove(this.ordersInKitchen, (it) => it.id === item.id);
         }
-        console.log('preparing', this.ordersToPrepare);
-        console.log('kitchen', this.ordersInKitchen);
     }
 
     has(item: DashboardItems, type: QueueType): boolean {
