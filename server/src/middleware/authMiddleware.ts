@@ -1,7 +1,6 @@
 import {Response, NextFunction} from "express";
 import { CustomRequest, JWTUser } from '../types';
 import jwt from 'jsonwebtoken';
-import { User } from '../db/models';
 import asyncHandler from "express-async-handler";
 import logger from '../utils/logger';
 import env from "../config/env";
