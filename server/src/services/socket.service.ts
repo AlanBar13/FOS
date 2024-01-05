@@ -82,6 +82,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
                         id: item.orderItemId
                     },
                     data: {
+                        status: "inProgress",
                         inKitchenAt: new Date()
                     }
                 })
@@ -119,6 +120,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
                         id: item.orderItemId
                     },
                     data: {
+                        status: "done",
                         doneAt: new Date()
                     }
                 })

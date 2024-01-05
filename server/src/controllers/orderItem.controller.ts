@@ -139,6 +139,17 @@ export const deleteItemByOrderId = asyncHandler(async (req: Request, res: Respon
                     total: total
                 }
             });
+        }else{
+            await db.order.update({
+                where: {
+                    id: orderId
+                },
+                data: {
+                    subtotal: 0,
+                    taxTotal: 0,
+                    total: 0
+                }
+            })
         }
         res.json({"message": `Item ${itemId} was deleted from order ${orderId}`})
     }else{

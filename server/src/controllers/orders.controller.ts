@@ -18,6 +18,19 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
 export const registerOrder = asyncHandler(async (req: Request, res: Response) => {
     const tableId = Number(req.params.tableId);
 
+    const existingOrder = await db.order.findFirst({ 
+        where: { 
+            tableId: tableId,
+            status: {
+                notIn: ["paid", "deleted", "notPaid", "userClosed"]
+            }
+        }
+    });
+
+    if (existingOrder !== null){
+        throw new Error(`Already an active order for this table`)
+    }
+
     const order = await db.order.create({
         data: {
             tableId,

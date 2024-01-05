@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { RawOrder, UpdateOrder, getOrderStatusSring } from '../../../models/Order';
 import { useAlert } from '../../../hooks/useAlert';
-import { updateOrder, fetchOrder } from '../../../services/order.service';
+import { updateOrder, fetchOrder, deleteItem } from '../../../services/order.service';
 import { formatPriceFixed } from '../../../utils/numbers';
 import { formatStringDate } from '../../../utils/dates';
 import OrderItemTableComponent from './OrderItemTableComponent';
@@ -55,6 +55,19 @@ export default function OrderPreviewComponent() {
         setisLoading(false);
     }
 
+    const deleteOrderItem = async (itemId: number) => {
+        if (id == null){
+            return;
+        }
+
+        try {
+            await deleteItem(id, itemId)
+            window.location.reload();
+        } catch (error) {
+            showAlert(`Error: ${(error as Error).message}`, 'error');
+        }
+    }
+
     return (
         <>
             <AdminAppBarComponent title={`Orden #${id}`} backUrl={'/admin/orders'} />
@@ -92,7 +105,7 @@ export default function OrderPreviewComponent() {
                         )}
                         <Divider sx={{ margin: '1rem' }} flexItem />
                         {data.OrderItems && data.OrderItems.length > 0 ? (
-                            <OrderItemTableComponent items={data.OrderItems} />
+                            <OrderItemTableComponent items={data.OrderItems} onDelete={deleteOrderItem} />
                         ):(
                             <Typography>No hay productos</Typography>
                         )}

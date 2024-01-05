@@ -9,13 +9,13 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 interface OrderItemTableComponentProps {
     items?: RawOrderItem[]
+    onDelete: (id: number) => void
 }
-export default function OrderItemTableComponent({ items = [] }: OrderItemTableComponentProps){
+export default function OrderItemTableComponent({ items = [], onDelete }: OrderItemTableComponentProps){
     return (
         <TableContainer component={Paper}>
             <Table sx={{minWidth: 350}}>
@@ -27,7 +27,6 @@ export default function OrderItemTableComponent({ items = [] }: OrderItemTableCo
                         <TableCell>Precio</TableCell>
                         <TableCell>IVA</TableCell>
                         <TableCell>Total</TableCell>
-                        <TableCell>Editar</TableCell>
                         <TableCell>Borrar</TableCell>
                     </TableRow>
                 </TableHead>
@@ -41,12 +40,7 @@ export default function OrderItemTableComponent({ items = [] }: OrderItemTableCo
                             <TableCell>{formatPriceFixed(item.Menu.tax ?? 0)}</TableCell>
                             <TableCell>{item.Menu.tax !== null ? (formatPriceFixed((item.Menu.price + item.Menu.tax) * item.qty)): (formatPriceFixed(item.Menu.price * item.qty))}</TableCell>
                             <TableCell>
-                                <IconButton>
-                                    <EditIcon />
-                                </IconButton>
-                            </TableCell>
-                            <TableCell>
-                                <IconButton>
+                                <IconButton onClick={() => onDelete(item.id)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </TableCell>
