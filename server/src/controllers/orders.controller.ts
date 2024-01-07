@@ -28,6 +28,7 @@ export const registerOrder = asyncHandler(async (req: Request, res: Response) =>
     });
 
     if (existingOrder !== null){
+        res.status(400);
         throw new Error(`Already an active order for this table`)
     }
 

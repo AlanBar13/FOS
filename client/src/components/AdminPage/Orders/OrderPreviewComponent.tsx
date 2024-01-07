@@ -1,25 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { RawOrder, UpdateOrder, getOrderStatusSring } from '../../../models/Order';
+import { RawOrder, UpdateOrder, getOrderStatusSring, RawMenu } from '../../../models/Order';
 import { useAlert } from '../../../hooks/useAlert';
 import { updateOrder, fetchOrder, deleteItem } from '../../../services/order.service';
+import { fetchMenu } from '../../../services/menu.service';
 import { formatPriceFixed } from '../../../utils/numbers';
 import { formatStringDate } from '../../../utils/dates';
+import { addOrderItem } from '../../../services/table.service';
+import { AddToDashboardItems } from '../../../models/SocketModels';
+import { SocketEvents, socket } from '../../../utils/socketClient';
+
 import OrderItemTableComponent from './OrderItemTableComponent';
 import AdminAppBarComponent from '../Shared/AdminAppBarComponent';
 import OrderPreviewFormComponent from './OrderPreviewFormComponent';
+
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogActionsContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
 import "./OrderPreviewComponent.css"
-
 
 export default function OrderPreviewComponent() {
     const { id } = useParams();
     const { showAlert } = useAlert();
     const [isLoading, setisLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [selection, setSelection] = useState("");
     const [data, setData] = useState<RawOrder | null>(null);
+    const [menu, setMenu] = useState<RawMenu[]>([]);
+    const [qty, setQty] = useState<number>(0);
+    const [modalLoading, setModalLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const getData = async () => {
@@ -68,6 +88,81 @@ export default function OrderPreviewComponent() {
         }
     }
 
+    const handleClose = () => {
+        setOpen(false);
+    }
+
+    const handleOpen = async () => {
+        try {
+            const menu = await fetchMenu();
+            setMenu(menu);
+            setOpen(true);
+        } catch (error) {
+            console.log(error);
+            showAlert(`Error con el servidor`, 'error');
+        }
+    }
+
+    const handleChangeMenu = (event: SelectChangeEvent) => {
+        const menuId = event.target.value;
+        if (menuId === "0"){
+            showAlert('Mesa seleccionada no disponible', 'warning');
+            return;
+        }
+
+        setSelection(menuId);
+    }
+
+    const handleChangeQty = (event : ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (event.target.value === ""){
+            setQty(0);
+        }else{
+            const qty = parseInt(event.target.value);
+            if (qty > 0)
+                setQty(qty);
+            else
+                showAlert("Cantidad tiene que ser mayor a 0", "warning");
+        }
+    }
+
+    const createItem = async () => {
+        try {
+            if (data == null){
+                return;
+            }
+            
+            setModalLoading(true);
+            const newOrderItem = await addOrderItem(`${data.tableId}`, data.id, {
+                menuId: parseInt(selection),
+                qty: qty
+            });
+
+            const newOrder = data;
+            if (newOrder.OrderItems){
+                newOrder.OrderItems = [...newOrder.OrderItems, newOrderItem];
+                setData(newOrder);
+            }
+
+            const dashboardItem: AddToDashboardItems = {
+                orderItemId: newOrderItem.id,
+                id: newOrderItem.Menu.id,
+                name: newOrderItem.Menu.name,
+                price: newOrderItem.Menu.price,
+                amount: newOrderItem.qty,
+                status: newOrderItem.status,
+                total: newOrderItem.qty * newOrderItem.Menu.price
+            }
+
+            socket.emit(SocketEvents.clientSendOrder, data.id, data.tableId, [dashboardItem]);
+            setOpen(false);
+            setModalLoading(false);
+            window.location.reload();
+        } catch (error) {
+            showAlert(`Error al crear nuevo producto a la order ${data?.id}`, "error")
+            setModalLoading(false);
+        }
+    }
+
     return (
         <>
             <AdminAppBarComponent title={`Orden #${id}`} backUrl={'/admin/orders'} />
@@ -98,6 +193,8 @@ export default function OrderPreviewComponent() {
                             </div>
                         </Paper>
                         <Divider sx={{ margin: '1rem' }} flexItem />
+                        <Button fullWidth variant='contained' color='info' onClick={handleOpen}>Agregar Producto a la Orden</Button>
+                        <Divider sx={{ margin: '1rem' }} flexItem />
                         {isLoading ? (
                             <CircularProgress />
                         ) : (
@@ -117,7 +214,30 @@ export default function OrderPreviewComponent() {
                         </Typography>
                     </div>
                 )
-            )} 
+            )}
+            <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+                <DialogTitle>Agregar Producto</DialogTitle>
+                {modalLoading ? (
+                    <CircularProgress sx={{margin: '3rem'}} />
+                ) : (
+                    <DialogActionsContent>
+                        <FormControl sx={{marginTop: '0.5rem'}} fullWidth>
+                            <InputLabel>Producto:</InputLabel>
+                            <Select label="Producto:" value={selection} onChange={handleChangeMenu}>
+                                {menu.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                        <FormControl sx={{marginTop: '0.5rem'}} fullWidth>
+                            <InputLabel>Cantidad</InputLabel>
+                            <OutlinedInput label="Cantidad:" value={qty} onChange={handleChangeQty} />
+                        </FormControl>
+                    </DialogActionsContent>
+                )}
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancelar</Button>
+                    <Button onClick={createItem}>Agregar</Button>
+                </DialogActions>
+            </Dialog>
         </>
     )
 }

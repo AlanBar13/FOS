@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { KeyValues, OrderStatus } from '../../../utils/constants';
+import { UpdateOrder } from '../../../models/Order';
 
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -8,7 +9,6 @@ import Select from '@mui/material/Select';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
-import { UpdateOrder } from '../../../models/Order';
 
 interface OrderPreviewFormProps {
     orderStatus?: string

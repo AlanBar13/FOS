@@ -1,6 +1,6 @@
 import { api } from "../utils/apiClient";
 import { Table } from "../models/Table";
-import { AddItemToOrder, Order, RawOrder, RawOrderItem } from "../models/Order";
+import { AddItemToOrder, RawOrder, RawOrderItem } from "../models/Order";
 import { AxiosResponse } from "axios";
 
 export const fetchTables = async (): Promise<Table[]> => {
@@ -19,7 +19,7 @@ export async function getActiveOrder(tableId: string): Promise<RawOrder> {
     return (await api.get(`/table/${tableId}/order`)).data as RawOrder;
 }
 
-export const createOrder = async (tableId: string): Promise<Order> => {
+export const createOrder = async (tableId: string): Promise<RawOrder> => {
     return (await api.post(`/table/${tableId}/order`)).data;
 }
 
