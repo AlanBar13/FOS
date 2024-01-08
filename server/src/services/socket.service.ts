@@ -6,12 +6,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { ItemStatus, OrderStatus, PaymentMethods } from '../constants';
 import { AddToDashboardItems, DashboardItems, NeedWaiterRequest } from '../types';
 import kitchenQueue from './kitchenQueue.service';
+import { Prisma } from '@prisma/client';
+
+const orderItemsWithMenu = Prisma.validator<Prisma.OrderItemDefaultArgs>()({ include: { Menu: true }});
+type OrderItemWithMenu = Prisma.OrderItemGetPayload<typeof orderItemsWithMenu>;
 
 export const onlineClients = new Set();
 
-export const onNewWebSocketConnection = (socket: Socket) => {
+export const onNewWebSocketConnection = async (socket: Socket) => {
     logger.info(`Socket ${socket.id} has connected`);
     onlineClients.add(socket.id);
+
+    socket.on("join", (room: string) => {
+        logger.info(`Client ${socket.id} joined room ${room}`)
+        socket.join(room);
+        socket.to(room).emit("roomConnected", `Connected to room ${room}`);
+    });
 
     socket.on("connect", () => {
         socket.emit('id', socket.id)
@@ -23,7 +33,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
     });
 
     // More socket logic
-    socket.on("sendOrder", async (order_id: number, table_id: number, items: AddToDashboardItems[]) => {
+    socket.on("sendOrder", async (order_id: number, table_id: number, items: OrderItemWithMenu[]) => {
         logger.info(`OrderSent order: ${order_id}, table: ${table_id} `)
         try {
             const currentOrder = await db.order.findUnique({ where : { id: order_id }});
@@ -42,15 +52,26 @@ export const onNewWebSocketConnection = (socket: Socket) => {
 
 
             if (currentOrder && items){
+                let newItems: AddToDashboardItems[] = [];
+                items.map((item) => newItems.push({
+                    orderItemId: item.id,
+                    id: item.Menu.id,
+                    name: item.Menu.name,
+                    price: item.Menu.price,
+                    amount: item.qty,
+                    status: item.status,
+                    total: item.qty * item.Menu.price
+                }));
                 const dashboardItem : DashboardItems = {
                     id: uuidv4(),
                     orderId: currentOrder.id,
                     tableId: currentOrder.tableId,
                     orderStatus: OrderStatus.ordering,
-                    items
+                    items: newItems
                 }
                 kitchenQueue.addToQueue(dashboardItem);
                 io.emit("dashboardOrderServer", dashboardItem);
+                io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", items, "itemAdded");
             }else{
                 throw new Error(`Order could not be updated`)
             }
@@ -76,16 +97,21 @@ export const onNewWebSocketConnection = (socket: Socket) => {
                 }
             });
 
+            let orderItems: OrderItemWithMenu[] = [];
             await Promise.all(dashboardItem.items.map(async (item) => {
-                await db.orderItem.update({
+                const orderItem = await db.orderItem.update({
                     where: {
                         id: item.orderItemId
                     },
                     data: {
                         status: "inProgress",
                         inKitchenAt: new Date()
+                    },
+                    include: {
+                        Menu: true
                     }
-                })
+                });
+                orderItems.push(orderItem);
             }))
 
             dashboardItem.orderStatus = OrderStatus.inKitchen;
@@ -93,6 +119,7 @@ export const onNewWebSocketConnection = (socket: Socket) => {
             dashboardItem.items = updatedItems;
             kitchenQueue.moveToKitchen(dashboardItem);
             io.emit("orderUpdateServer", dashboardItem);
+            io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", orderItems, "itemKitchen");
         } catch (error) {
             logger.error(`[Socket] ${error}`);
         }

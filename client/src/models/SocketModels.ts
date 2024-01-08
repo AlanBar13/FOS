@@ -22,3 +22,5 @@ export interface NeedWaiterRequest {
     orderId: number
     message: string
 }
+
+export type FeedbackType = "itemAdded" | "itemKitchen" | "itemReady";

@@ -11,4 +11,6 @@ export class SocketEvents {
     static clientUpdateOrder = "orderUpdate";
     static clientOrderReady = "orderReady";
     static serverOrderReady = "orderReadyServer";
+    static sendClientFeedback = "sendClientFeedback";
+    static roomConnected = "roomConnected";
 }

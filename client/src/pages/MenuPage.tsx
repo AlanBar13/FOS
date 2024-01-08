@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Cart } from '../models/Cart';
 import { RawMenu, RawOrderItem } from '../models/Order';
-import { AddToDashboardItems } from '../models/SocketModels';
+import { FeedbackType } from '../models/SocketModels';
 import { fetchMenu } from '../services/menu.service';
 import { createOrder, addOrderItem, getActiveOrder } from '../services/table.service';
 import { useQuery } from '../hooks/useQuery';
 import { socket, SocketEvents } from '../utils/socketClient';
 import { useAlert } from '../hooks/useAlert';
+import { useCurrentOrderDispatch } from '../hooks/useCurrentOrder';
 
 import { Global } from '@emotion/react';
 import { styled } from '@mui/material/styles';
@@ -18,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import MenuItemComponent from '../components/MenuPage/MenuItemComponent';
 import AppLayout from '../components/Shared/AppLayout';
 import CartComponent from '../components/MenuPage/CartComponent';
+import { SocketEvent, useSocketEvents } from '../hooks/useSocketEvents';
 
 const drawerBleeding = 56;
 
@@ -37,6 +39,7 @@ const Puller = styled(Box)(({ theme }) => ({
 
 export default function MenuPage(){
     const { showAlert } = useAlert();
+    const dispatch = useCurrentOrderDispatch();
     const query = useQuery();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
     const [menu, setMenu] = useState<RawMenu[]>([]);
@@ -45,8 +48,31 @@ export default function MenuPage(){
     const [tableId] = useState<string | null>(query.get("mesa"));
     const [orderId, setOrderId] = useState<number | null>(null);
     const [cart, setCart] = useState<Cart[]>([]);
-    const [itemsOrdered, setItemsOrdered] = useState<RawOrderItem[]>([]);
     const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
+
+    const events: SocketEvent[] = [
+        {
+            name: SocketEvents.sendClientFeedback,
+            handler(items: RawOrderItem[], type: FeedbackType) {
+                if (type === "itemAdded"){
+                    dispatch({
+                        type: "addItems",
+                        payload: {
+                            orderItems: items
+                        }
+                    })
+                }
+            }
+        },
+        {
+            name: SocketEvents.roomConnected,
+            handler(msg: string) {
+                console.log(`[Socket] ${msg}`)
+            }
+        }
+    ];
+
+    useSocketEvents(events);
 
     useEffect(() => {
         document.title = `${companyName} | Menu`;
@@ -54,10 +80,17 @@ export default function MenuPage(){
             setIsLoading(true);
             try {
                 if(tableId !== null){
+                    const room = `table:${tableId}`;
+                    socket.emit("join", room)
                     const order = await getActiveOrder(tableId);
                     setOrderId(order.id);
                     if(order.OrderItems){
-                        setItemsOrdered(order.OrderItems);
+                        dispatch({
+                            type: "addItems",
+                            payload: {
+                                orderItems: order.OrderItems
+                            }
+                        });
                     }
                 }
 
@@ -78,7 +111,6 @@ export default function MenuPage(){
             return;
         }
 
-        let newItems: AddToDashboardItems[] = [];
         let newItemsOrdered: RawOrderItem[] = [];
         await Promise.all(
             cart.map(async (crt) => {
@@ -88,16 +120,6 @@ export default function MenuPage(){
                         qty: crt.qty,
                         //TODO: add comments
                     });
-                    console.log(newOrderItem);
-                    newItems.push({
-                        orderItemId: newOrderItem.id,
-                        id: newOrderItem.Menu.id,
-                        name: newOrderItem.Menu.name,
-                        price: newOrderItem.Menu.price,
-                        amount: newOrderItem.qty,
-                        status: newOrderItem.status,
-                        total: newOrderItem.qty * newOrderItem.Menu.price 
-                    });
                     newItemsOrdered.push(newOrderItem);
                 } catch (error) {
                     console.log(error)
@@ -105,11 +127,7 @@ export default function MenuPage(){
             })
         );
 
-        if (newItemsOrdered.length > 0){
-            setItemsOrdered([...itemsOrdered, ...newItemsOrdered]);
-        }
-
-        socket.emit(SocketEvents.clientSendOrder, orderIdToUpdate, Number(tableId), newItems)
+        socket.emit(SocketEvents.clientSendOrder, orderIdToUpdate, Number(tableId), newItemsOrdered)
     }
 
     const addToCart = (item: RawMenu, qty: number) => {
@@ -149,18 +167,6 @@ export default function MenuPage(){
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpenCart(newOpen);
     };
-
-    //TODO: Improve this function
-    // const orderAndGroupItems = (orderedItems: RawOrderItem[]): OrderedItems[] => {
-    //     const grouped = lodash.groupBy(orderedItems, 'menuId');
-    //     const flatten: OrderedItems[] = lodash.map(grouped, (items, id) => ({
-    //         menuId: id,
-    //         name: lodash.map(items, 'Menu.name')[0],
-    //         qty: lodash.sumBy(items, 'qty'),
-    //         total: lodash.sumBy(items, 'Menu.price') * lodash.sumBy(items, 'qty')
-    //     }));
-    //     return flatten;
-    // }
 
     return (
         <AppLayout companyName={`${companyName} | Menu`}>
@@ -212,7 +218,7 @@ export default function MenuPage(){
                         overflow: 'auto',
                     }}
                     >
-                    <CartComponent cart={cart} isLoading={cartIsLoading} deleteFromCart={deleteFromCart} onOrder={order} orderedItems={itemsOrdered} />
+                    <CartComponent cart={cart} isLoading={cartIsLoading} deleteFromCart={deleteFromCart} onOrder={order} />
                 </StyledBox>
             </SwipeableDrawer>
         </AppLayout>

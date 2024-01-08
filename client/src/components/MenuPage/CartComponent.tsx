@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import _ from 'lodash';
 import { Cart } from "../../models/Cart";
 import { formatPriceFixed } from "../../utils/numbers";
-import { RawOrderItem } from '../../models/Order';
+import { useCurrentOrder } from '../../hooks/useCurrentOrder';
 
 import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
@@ -14,29 +14,29 @@ import LinearProgress from '@mui/material/LinearProgress';
 interface CartComponentProps {
     cart: Cart[]
     isLoading: boolean
-    orderedItems?: RawOrderItem[]
     deleteFromCart: (index: number) => void
     onOrder: () => void
 }
 
-export default function CartComponent({ cart, isLoading = false, orderedItems = [], deleteFromCart, onOrder }: CartComponentProps) {
+export default function CartComponent({ cart, isLoading = false, deleteFromCart, onOrder }: CartComponentProps) {
+    const currentOrder = useCurrentOrder();
     const cartTotal = useMemo(() => _.sumBy(cart, 'total'), [cart]);
     const orderTotal = useMemo(() => {
         let total = 0;
-        orderedItems.forEach((item) => {
+        currentOrder.orderedItems.forEach((item) => {
             if(item.Menu == null){
                 return;
             }
 
             if(item.Menu.tax != null) {
-                total = total + ((item.Menu.price + item.Menu.tax) * item.qty);
+                total += (item.Menu.price + item.Menu.tax) * item.qty;
             }else{
-                total = total + (item.Menu.price * item.qty)
+                total += item.Menu.price * item.qty;
             }
         });
 
         return total;
-    }, [cart, orderedItems]);
+    }, [cart, currentOrder.orderedItems]);
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between'}}>
@@ -59,13 +59,13 @@ export default function CartComponent({ cart, isLoading = false, orderedItems = 
                     <Button variant='contained' disabled={cart.length === 0} onClick={onOrder}>Ordenar</Button>
                 </Box>
                 <Divider orientation='vertical' flexItem />
-                {orderedItems.length > 0 && (
+                {currentOrder.orderedItems.length > 0 && (
                     <Box sx={{overflow: 'auto'}}>
                         <Divider />
                         <Typography variant='h6'>
                             Resumen Orden
                         </Typography>
-                        {orderedItems.map((item, index) => (
+                        {currentOrder.orderedItems.map((item, index) => (
                             <Box key={index} sx={{display: 'flex', flexDirection: 'row'}}>
                                 <Typography sx={{paddingTop: '0.55rem'}} fontSize={13}>
                                     {item.qty}x - {item.Menu.name} - {formatPriceFixed(item.Menu.price * item.qty)}
@@ -79,7 +79,7 @@ export default function CartComponent({ cart, isLoading = false, orderedItems = 
                 <Divider />
                 {isLoading && <LinearProgress />}
                 <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Button disabled={orderedItems.length === 0}>Pagar</Button>
+                    <Button disabled={currentOrder.orderedItems.length === 0}>Pagar</Button>
                     <Typography sx={{paddingTop: '0.5rem'}} component="div">
                         <strong>Total a pagar: {formatPriceFixed(orderTotal)}</strong>
                     </Typography>

@@ -1,3 +1,4 @@
+import { OrderItem } from '@prisma/client';
 import { Request } from 'express'
 import { Server } from 'socket.io';
 
@@ -18,6 +19,8 @@ export interface OrderQueryFilters {
     endDate?: Date
 }
 
+type FeedbackType = "itemAdded" | "itemKitchen" | "itemReady";
+
 export interface ServerToClientEvents {
     noArg: () => void
     dashboardOrderServer: (newItem: DashboardItems) => void
@@ -25,6 +28,7 @@ export interface ServerToClientEvents {
     orderReadyServer: (item: DashboardItems) => void
     needWaiter: (obj: NeedWaiterRequest) => void
     withAck: (d: string, callback: (e: number) => void) => void
+    sendClientFeedback: (item: OrderItem[], type: FeedbackType) => void
 }
 
 export interface ClientToServerEvents {
