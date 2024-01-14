@@ -28,7 +28,7 @@ export interface ServerToClientEvents {
     orderReadyServer: (item: DashboardItems) => void
     needWaiter: (obj: NeedWaiterRequest) => void
     withAck: (d: string, callback: (e: number) => void) => void
-    sendClientFeedback: (item: OrderItem[], type: FeedbackType) => void
+    sendClientFeedback: (item: OrderItem[], type: FeedbackType, orderId: number) => void
 }
 
 export interface ClientToServerEvents {

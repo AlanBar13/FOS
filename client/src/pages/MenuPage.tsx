@@ -8,6 +8,7 @@ import { useQuery } from '../hooks/useQuery';
 import { socket, SocketEvents } from '../utils/socketClient';
 import { useAlert } from '../hooks/useAlert';
 import { useCurrentOrderDispatch } from '../hooks/useCurrentOrder';
+import { SocketEvent, useSocketEvents } from '../hooks/useSocketEvents';
 
 import { Global } from '@emotion/react';
 import { styled } from '@mui/material/styles';
@@ -19,7 +20,7 @@ import Typography from '@mui/material/Typography';
 import MenuItemComponent from '../components/MenuPage/MenuItemComponent';
 import AppLayout from '../components/Shared/AppLayout';
 import CartComponent from '../components/MenuPage/CartComponent';
-import { SocketEvent, useSocketEvents } from '../hooks/useSocketEvents';
+import DialogComponent from '../components/Shared/DialogComponent';
 
 const drawerBleeding = 56;
 
@@ -49,18 +50,31 @@ export default function MenuPage(){
     const [orderId, setOrderId] = useState<number | null>(null);
     const [cart, setCart] = useState<Cart[]>([]);
     const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
+    const [openModal, setOpenModal] = useState<boolean>(false);
 
     const events: SocketEvent[] = [
         {
             name: SocketEvents.sendClientFeedback,
-            handler(items: RawOrderItem[], type: FeedbackType) {
-                if (type === "itemAdded"){
-                    dispatch({
-                        type: "addItems",
-                        payload: {
-                            orderItems: items
-                        }
-                    })
+            handler(items: RawOrderItem[], type: FeedbackType, orderId: number) {
+                if (orderId > 0){
+                    setOrderId(orderId);
+                }
+
+                switch(type){
+                    case "itemAdded":
+                        dispatch({
+                            type: "addItems",
+                            payload: {
+                                orderItems: items
+                            }
+                        });
+                        break;
+                    case "itemKitchen":
+                        console.log(items, type, orderId)
+                        break;
+                    default:
+                        console.log(items, type, orderId)
+                        break;
                 }
             }
         },
@@ -140,7 +154,7 @@ export default function MenuPage(){
         setCart(newCart);
     }
 
-    const order = async () => {
+    const orderItems = async () => {
         if (tableId === null) {
             console.log('no table id')
             return;
@@ -164,12 +178,21 @@ export default function MenuPage(){
         setCartIsLoading(false);
     }
 
+    const order = async () => {
+        await orderItems();
+        setOpenModal(false)
+    }
+
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpenCart(newOpen);
     };
 
+    const onOpenModal = () => {
+        setOpenModal(true);
+    }
+
     return (
-        <AppLayout companyName={`${companyName} | Menu`}>
+        <AppLayout companyName={`${companyName} | Menu`} toggleCart={() => setOpenCart(true)}>
             <Global
                 styles={{
                 '.MuiDrawer-root > .MuiPaper-root': {
@@ -218,9 +241,12 @@ export default function MenuPage(){
                         overflow: 'auto',
                     }}
                     >
-                    <CartComponent cart={cart} isLoading={cartIsLoading} deleteFromCart={deleteFromCart} onOrder={order} />
+                    <CartComponent cart={cart} isLoading={cartIsLoading} deleteFromCart={deleteFromCart} onOrder={onOpenModal} />
                 </StyledBox>
             </SwipeableDrawer>
+            <DialogComponent title='Deseas continuar?' isOpen={openModal} onCancel={() => setOpenModal(false)} onConfirm={order}>
+                <Typography>Una vez agregados los productos no se podra hacer cambios a la orden, si tienes duda pregunta al mesero.</Typography>
+            </DialogComponent>
         </AppLayout>
     )
 }

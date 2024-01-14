@@ -10,9 +10,10 @@ import Tooltip from '@mui/material/Tooltip';
 interface AppBarComponentProps {
     companyName: string
     hideCart?: boolean
+    toggleCart?: () => void
 }
 
-export default function AppBarComponent({ companyName = "--", hideCart = false }: AppBarComponentProps) {
+export default function AppBarComponent({ companyName = "--", hideCart = false, toggleCart }: AppBarComponentProps) {
     return (
         <AppBar position="sticky" style={{background: "#2E3B55"}}>
             <Container maxWidth="xl">
@@ -51,7 +52,7 @@ export default function AppBarComponent({ companyName = "--", hideCart = false }
                     {!hideCart ? (
                         <Box sx={{ flexGrow: 0 }}>
                             <Tooltip title="Abrir carrito">
-                                <IconButton sx={{ p: 0 }} color='secondary'>
+                                <IconButton sx={{ p: 0 }} color='secondary' onClick={toggleCart}>
                                     <ShoppingCartIcon  />
                                 </IconButton>
                             </Tooltip>

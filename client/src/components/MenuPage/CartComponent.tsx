@@ -38,6 +38,19 @@ export default function CartComponent({ cart, isLoading = false, deleteFromCart,
         return total;
     }, [cart, currentOrder.orderedItems]);
 
+    const getOrderColor = (status: string): string => {
+        switch(status){
+            case "ordered":
+                return "red";
+            case "inProgress":
+                return "yellow";
+            case "done":
+                return "green";
+            default:
+                return "white"
+        }
+    }
+
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between'}}>
             <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -66,7 +79,7 @@ export default function CartComponent({ cart, isLoading = false, deleteFromCart,
                             Resumen Orden
                         </Typography>
                         {currentOrder.orderedItems.map((item, index) => (
-                            <Box key={index} sx={{display: 'flex', flexDirection: 'row'}}>
+                            <Box key={index} sx={{display: 'flex', flexDirection: 'row', backgroundColor: getOrderColor(item.status)}}>
                                 <Typography sx={{paddingTop: '0.55rem'}} fontSize={13}>
                                     {item.qty}x - {item.Menu.name} - {formatPriceFixed(item.Menu.price * item.qty)}
                                 </Typography>

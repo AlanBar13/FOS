@@ -71,7 +71,7 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
                 }
                 kitchenQueue.addToQueue(dashboardItem);
                 io.emit("dashboardOrderServer", dashboardItem);
-                io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", items, "itemAdded");
+                io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", items, "itemAdded", order_id);
             }else{
                 throw new Error(`Order could not be updated`)
             }
@@ -119,7 +119,7 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
             dashboardItem.items = updatedItems;
             kitchenQueue.moveToKitchen(dashboardItem);
             io.emit("orderUpdateServer", dashboardItem);
-            io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", orderItems, "itemKitchen");
+            io.to(`table:${dashboardItem.tableId}`).emit("sendClientFeedback", orderItems, "itemKitchen", dashboardItem.orderId);
         } catch (error) {
             logger.error(`[Socket] ${error}`);
         }
