@@ -7,6 +7,7 @@ export interface Menu {
     price: number
     tax?: number
     img?: string
+    prepTime?: string
     createdAt?: Date
     updatedAt?: Date
     deletedAt?: Date

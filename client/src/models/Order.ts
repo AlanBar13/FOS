@@ -20,6 +20,7 @@ export type RawMenu = {
     available: boolean
     description: string | null
     img: string | null
+    prepTime: string | null
     category: string
     createdAt: string
     updatedAt: string

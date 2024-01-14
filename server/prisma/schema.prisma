@@ -16,6 +16,7 @@ model Menu {
   price       Float
   tax         Float?
   img         String?
+  prepTime    String?
   createdAt   DateTime    @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime?   @db.Timestamptz(6)
   OrderItem   OrderItem[]

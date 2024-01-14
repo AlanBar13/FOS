@@ -62,8 +62,11 @@ export default function MenuItemComponent({ item, onAddClicked }: MenuItemCompon
                 </CardContent>
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.3rem'}}>
+                    <Typography sx={{fontSize: '0.7rem', marginRight: '0.1rem'}} color="text.secondary">
+                        {item.prepTime !== "" && item.prepTime ? `Aprox. ${item.prepTime}`: null}
+                    </Typography>
                     <ControlsComponent value={qty} operation={handleChange} />
-                    <Button sx={{marginLeft: '0.3rem'}} onClick={() => onAddClicked(item, qty)}>Añadir</Button>
+                    <Button sx={{marginLeft: '0.1rem'}} onClick={() => onAddClicked(item, qty)}>Añadir</Button>
                 </Box>
             </Box>
         </Card>

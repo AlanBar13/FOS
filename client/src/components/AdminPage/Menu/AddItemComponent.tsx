@@ -53,6 +53,7 @@ const defaultItem : Menu = {
     category: "",
     price: 0,
     tax: 0,
+    prepTime: "",
     img: undefined
 }
 
@@ -93,6 +94,14 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
             setItem({...item, tax: 0 });
         }else{
             setItem({...item, tax: parseFloat(event.target.value) });
+        } 
+    }
+
+    const handlePrepTimeChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (event.target.value === "") {
+            setItem({...item, prepTime: "" });
+        }else{
+            setItem({...item, prepTime: event.target.value });
         } 
     }
 
@@ -159,13 +168,16 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
                         ))}
                     </TextField>
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={3}>
                     <TextField fullWidth label="Precio" type="number" InputProps={{ startAdornment: (<InputAdornment position='start'>$</InputAdornment>)}} required value={item.price.toString()} onChange={handlePriceChange} />
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={3}>
                     <TextField fullWidth label="IVA" type="number" InputProps={{ startAdornment: (<InputAdornment position='start'>$</InputAdornment>)}} value={item.tax?.toString()} onChange={handleTaxChange} />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={3}>
+                    <TextField fullWidth label="Tiempo de preparacion (Aprox.)" value={item.prepTime} onChange={handlePrepTimeChange} />
+                </Grid>
+                <Grid item xs={3}>
                     <FormControlLabel control={<Switch checked={item.available} onChange={handleAvailableChange} />} label="Disponible" />
                 </Grid>
                 <Grid item xs={12}>
