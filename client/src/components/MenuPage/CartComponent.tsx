@@ -79,7 +79,8 @@ export default function CartComponent({ cart, isLoading = false, deleteFromCart,
                             Resumen Orden
                         </Typography>
                         {currentOrder.orderedItems.map((item, index) => (
-                            <Box key={index} sx={{display: 'flex', flexDirection: 'row', backgroundColor: getOrderColor(item.status)}}>
+                            <Box key={index} sx={{display: 'flex', flexDirection: 'row'}}>
+                                <Box sx={{backgroundColor: getOrderColor(item.status), borderRadius: 0.5, color: getOrderColor(item.status)}}>|</Box>
                                 <Typography sx={{paddingTop: '0.55rem'}} fontSize={13}>
                                     {item.qty}x - {item.Menu.name} - {formatPriceFixed(item.Menu.price * item.qty)}
                                 </Typography>

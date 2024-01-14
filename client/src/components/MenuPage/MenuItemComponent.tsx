@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { RawMenu } from '../../models/Order';
+
+import ControlsComponent from './ControlsComponent';
+
 import {Box} from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 
 interface MenuItemComponentProps {
@@ -59,10 +60,9 @@ export default function MenuItemComponent({ item, onAddClicked }: MenuItemCompon
                         {item.description}
                     </Typography>
                 </CardContent>
+                
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '0.3rem'}}>
-                    <IconButton size='large' onClick={() => handleChange("-")}>-</IconButton>
-                    <TextField sx={{width: '2.9rem', alignItems: 'flex-end'}} inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', readOnly: true }} value={qty} />
-                    <IconButton size='large' onClick={() => handleChange("+")}>+</IconButton>
+                    <ControlsComponent value={qty} operation={handleChange} />
                     <Button sx={{marginLeft: '0.3rem'}} onClick={() => onAddClicked(item, qty)}>Añadir</Button>
                 </Box>
             </Box>
