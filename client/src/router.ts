@@ -2,6 +2,7 @@ import {createBrowserRouter} from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MenuPage from './pages/MenuPage';
 import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 import ErrorPage from './pages/ErrorPage';
 
 // Admin routes components
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
     {
         path: "/menu",
         Component: MenuPage
+    },
+    {
+        path: "/login",
+        Component: LoginPage
     },
     {
         path: "/admin",
