@@ -10,8 +10,8 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+// import FormControlLabel from '@mui/material/FormControlLabel';
+// import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -48,7 +48,7 @@ export default function LoginPage() {
                 const res = await loginUser(username.toString(), password.toString());
                 const userData = res.data as LoginData;
                 setUser({token: userData.token, role: userData.role, username: username.toString()});
-                return navigate(`/admin/dashboard`, { replace: true });
+                return navigate(`/admin`, { replace: true });
             }else{
                 showAlert("Usuario o Contraseña vacios", "warning");
             }
@@ -102,10 +102,10 @@ export default function LoginPage() {
                         id="password"
                         autoComplete="current-password"
                     />
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Recuerdame"
-                    />
+                    /> */}
                     {loading ? <CircularProgress /> : (
                         <Button
                             type="submit"

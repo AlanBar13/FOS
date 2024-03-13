@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, PropsWithChildren } from 'react';
+import { createContext, useContext, useState, PropsWithChildren, useEffect } from 'react';
 
-interface UserData {
+const userKey = "fos:user";
+
+export interface UserData {
     token: string
     username: string
     role: string
@@ -27,7 +29,21 @@ export const UserProvider = ({ children }: PropsWithChildren) => {
 
     const setUser = (data: UserData | null) => {
         setUserData(data);
+        const userStorage = localStorage.getItem(userKey);
+        if(userStorage !== null) {
+            localStorage.removeItem(userKey);
+        }
+
+        localStorage.setItem(userKey, JSON.stringify(data))
     }
+
+    useEffect(() => {
+        const userStorage = localStorage.getItem(userKey);
+        if(userStorage !== null) {
+            const userData = JSON.parse(userStorage) as UserData;
+            setUserData(userData);
+        }
+    }, []);
 
     return (
         <UserContext.Provider value={{user, setUser}}>

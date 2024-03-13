@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { UserData } from '../../hooks/useUser';
+
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -16,6 +18,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 
 interface AdminDrawerProps {
     drawerWidth: number
+    user: UserData | null
 }
 
 const pages = [

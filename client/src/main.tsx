@@ -10,12 +10,12 @@ import "./App.css";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider theme={theme}>
-      <AlertProvider>
-        <CurrentOrderProvider>
-          <UserProvider>
-            <RouterProvider router={router} />
-          </UserProvider>
-        </CurrentOrderProvider>
-      </AlertProvider>
+      <UserProvider>
+        <AlertProvider>
+          <CurrentOrderProvider>
+              <RouterProvider router={router} />
+          </CurrentOrderProvider>
+        </AlertProvider>
+      </UserProvider>
     </ThemeProvider>,
 )
