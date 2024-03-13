@@ -52,10 +52,10 @@ cd ./server
 npm run dev OR npm run start
 ```
 
-Create Migrations using Prisma
-Changes to the migration schema can be pushed like this
+Prisma migrations
 -
 ```
+// Changes made to the schema can be pushed using the following commands
 cd ./server
 dotenv -e ../.env.local -- npx prisma migrate dev
 ```
