@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
 import { User } from "../../models/Users";
 import { useAlert } from "../../hooks/useAlert";
-import AdminAppBarComponent from "./Shared/AdminAppBarComponent";
 import { fetchUsers } from "../../services/user.service";
-import axios, { AxiosError } from "axios";
+
+import AdminAppBarComponent from "./Shared/AdminAppBarComponent";
+
 
 export default function UsersComponent(){
     const { showAlert } = useAlert();

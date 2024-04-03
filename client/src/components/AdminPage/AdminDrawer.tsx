@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { UserData } from '../../hooks/useUser';
+import { useAuth } from '../../hooks/AuthProvider';
 
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -15,6 +16,7 @@ import BorderColorIcon from '@mui/icons-material/BorderColor';
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
 import GroupIcon from '@mui/icons-material/Group';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 interface AdminDrawerProps {
     drawerWidth: number
@@ -46,6 +48,13 @@ const pages = [
 
 export default function AdminDrawer({ drawerWidth = 240 }: AdminDrawerProps){
     const navigate = useNavigate();
+    const auth = useAuth();
+
+    const logout = () => {
+        if(auth){
+            auth.logOut()
+        }
+    }
 
     const navigateToRoute = (path: string) => {
         return navigate(path);
@@ -108,6 +117,28 @@ export default function AdminDrawer({ drawerWidth = 240 }: AdminDrawerProps){
                                 }}
                             >
                                 <GroupIcon />
+                            </ListItemIcon>
+                        </ListItemButton>
+                    </ListItem>
+                </Tooltip>
+                <Tooltip title="Cerrar Sesion" placement="right">
+                    <ListItem disablePadding sx={{ display: 'block' }}>
+                        <ListItemButton
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: 'center',
+                                px: 2.5,
+                            }}
+                            onClick={() => logout()}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: 'auto',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <LogoutIcon />
                             </ListItemIcon>
                         </ListItemButton>
                     </ListItem>

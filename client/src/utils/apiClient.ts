@@ -1,4 +1,5 @@
 import axios, {AxiosInstance, AxiosResponse, AxiosRequestConfig} from "axios"
+import { PersistenceKeys } from "./constants";
 
 class ApiClient {
     private instance: AxiosInstance | null = null;
@@ -12,6 +13,12 @@ class ApiClient {
         const http = axios.create({
             baseURL: url
         });
+
+        http.interceptors.request.use((config) => {
+            const token = localStorage.getItem(PersistenceKeys.TOKEN);
+            config.headers.Authorization = token ? `Bearer ${token}` : '';
+            return config;
+        })
 
         this.instance = http;
         return http;
