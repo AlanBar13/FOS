@@ -2,6 +2,7 @@ import { useContext, createContext, useState, PropsWithChildren } from "react";
 import { loginUser } from "../services/user.service";
 import { LoginData } from "../models/Users";
 import { PersistenceKeys } from "../utils/constants";
+import { useAlert } from "./useAlert";
 
 interface AuthContextType {
     role: string
@@ -13,6 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
+  const { showAlert } = useAlert();
   const [role, setRole] = useState<string>(localStorage.getItem(PersistenceKeys.ROLE) || "");
   const [token, setToken] = useState(localStorage.getItem(PersistenceKeys.TOKEN) || "");
 
@@ -26,7 +28,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       localStorage.setItem(PersistenceKeys.ROLE, data.role);
       return;
     } catch (error) {
-      console.log(error);
+      showAlert(`Usuario o Contraseña incorrectos`, 'error');
     }
   }
 

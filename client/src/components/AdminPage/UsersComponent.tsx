@@ -5,6 +5,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { fetchUsers } from "../../services/user.service";
 
 import AdminAppBarComponent from "./Shared/AdminAppBarComponent";
+import UserTableComponent from "./Users/UserTableComponent";
 
 
 export default function UsersComponent(){
@@ -34,7 +35,7 @@ export default function UsersComponent(){
     return(
         <>
             <AdminAppBarComponent title="Administracion de usuarios" />
-            {JSON.stringify(users)}
+            <UserTableComponent users={users} />
         </>
     )
 }
