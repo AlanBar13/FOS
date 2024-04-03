@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/user.service';
-import { LoginData } from '../models/Users';
 import { useAlert } from '../hooks/useAlert';
-import { useUser } from '../hooks/useUser';
 
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -19,6 +16,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useAuth } from '../hooks/AuthProvider';
 
 
 function Copyright(props: any) {
@@ -33,7 +31,7 @@ function Copyright(props: any) {
 
 export default function LoginPage() {
     const { showAlert } = useAlert();
-    const { setUser } = useUser();
+    const user = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -44,10 +42,8 @@ export default function LoginPage() {
             const data = new FormData(event.currentTarget);
             const username = data.get('user');
             const password = data.get('password');
-            if (username && password) {
-                const res = await loginUser(username.toString(), password.toString());
-                const userData = res.data as LoginData;
-                setUser({token: userData.token, role: userData.role, username: username.toString()});
+            if (username && password && user) {
+                await user.loginAction(username.toString(), password.toString());
                 return navigate(`/admin`, { replace: true });
             }else{
                 showAlert("Usuario o Contraseña vacios", "warning");

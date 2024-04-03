@@ -3,19 +3,19 @@ import { RouterProvider } from "react-router-dom"
 import { ThemeProvider } from '@mui/material/styles'
 import { AlertProvider } from './hooks/useAlert'
 import { CurrentOrderProvider } from './hooks/useCurrentOrder';
-import { UserProvider } from './hooks/useUser';
+import AuthProvider from './hooks/AuthProvider';
 import router from './router'
 import theme from './utils/theme'
 import "./App.css";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider theme={theme}>
-      <UserProvider>
         <AlertProvider>
           <CurrentOrderProvider>
-              <RouterProvider router={router} />
+              <AuthProvider>
+                <RouterProvider router={router} />
+              </AuthProvider>
           </CurrentOrderProvider>
         </AlertProvider>
-      </UserProvider>
     </ThemeProvider>,
 )

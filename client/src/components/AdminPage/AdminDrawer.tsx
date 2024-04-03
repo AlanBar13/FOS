@@ -18,7 +18,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 
 interface AdminDrawerProps {
     drawerWidth: number
-    user: UserData | null
+    user?: UserData | null
 }
 
 const pages = [

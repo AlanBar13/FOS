@@ -1,27 +1,15 @@
-import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useUser } from '../hooks/useUser';
 import {Box} from '@mui/material';
 import AdminDrawer from "../components/AdminPage/AdminDrawer";
+import PrivateRoute from '../components/Shared/PrivateRoute';
 
 const drawerWidth = 60;
 
 export default function AdminPage(){
-    const { user } = useUser();
-    const navigate = useNavigate();
-
-    // useEffect(() => {
-    //     console.log(user)
-    //     if(!user){
-    //         navigate(`/login`, { replace: true });
-    //     }
-    // }, []);
-
     return (
         <>
-            <AdminDrawer drawerWidth={drawerWidth} user={user} />
+            <AdminDrawer drawerWidth={drawerWidth} />
             <Box sx={{ flexGrow: 1, marginLeft: '4.5rem', marginRight: '1rem' } }>
-                <Outlet />
+                <PrivateRoute />
             </Box>
         </>
     )
