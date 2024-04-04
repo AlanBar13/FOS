@@ -10,13 +10,15 @@ import { formatDate } from '../../../utils/dates';
 
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+//import EditIcon from '@mui/icons-material/Edit';
+import { UserRoles } from '../../../utils/constants';
 
 interface UserTableProps {
     users: User[]
+    deleteUser: (user: User) => void
 }
 
-export default function UserTableComponent({ users }: UserTableProps){
+export default function UserTableComponent({ users, deleteUser }: UserTableProps){
     return (
         <TableContainer component={Paper}>
             <Table sx={{minWidth: 650}} size='small' aria-label='tables table'>
@@ -26,7 +28,6 @@ export default function UserTableComponent({ users }: UserTableProps){
                         <TableCell>Usuario</TableCell>
                         <TableCell>Rol</TableCell>
                         <TableCell>Creada</TableCell>
-                        <TableCell>Reset Constraseña</TableCell>
                         <TableCell>Eliminar Usuario</TableCell>
                     </TableRow>
                 </TableHead>
@@ -35,15 +36,10 @@ export default function UserTableComponent({ users }: UserTableProps){
                         <TableRow key={item.id}>
                             <TableCell>{item.id}</TableCell>
                             <TableCell>{item.username}</TableCell>
-                            <TableCell>{item.role}</TableCell>
+                            <TableCell>{UserRoles.getSpanishName(item.role)}</TableCell>
                             <TableCell>{formatDate(item.createdAt)}</TableCell>
                             <TableCell>
-                                <IconButton>
-                                    <EditIcon />
-                                </IconButton>
-                            </TableCell>
-                            <TableCell>
-                                <IconButton>
+                                <IconButton onClick={() => deleteUser(item)}>
                                     <DeleteIcon />
                                 </IconButton>
                             </TableCell>

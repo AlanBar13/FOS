@@ -78,6 +78,23 @@ export class UserRoles {
     static readonly admin = "admin";
     static readonly viewer = "viewer";
     static readonly waiter = "waiter";
+
+    static getRoles() {
+        return [this.admin, this.viewer, this.waiter];
+    }
+
+    static getSpanishName(role: string){
+        switch(role){
+            case this.dev:
+                return "Developer";
+            case this.admin:
+                return "Administrador";
+            case this.waiter:
+                return "Mesero";
+            default:
+                return "Usuario";
+        }
+    }
 }
 
 export class FoodCategories {
