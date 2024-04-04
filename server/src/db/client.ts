@@ -18,11 +18,7 @@ const prisma = new PrismaClient().$extends({
                     }
                 });
 
-                return {
-                    id: newUser.id,
-                    username: newUser.username,
-                    role: newUser.role
-                }
+                return newUser;
             },
             async checkUser(email: string, password: string): Promise<JWTUser | null> {
                 const user = await prisma.users.findUnique({ where: { username: email }});

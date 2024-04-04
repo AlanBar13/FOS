@@ -1,10 +1,11 @@
 import { useContext, createContext, useState, PropsWithChildren } from "react";
 import { loginUser } from "../services/user.service";
 import { LoginData } from "../models/Users";
-
+import { PersistenceKeys } from "../utils/constants";
+import { useAlert } from "./useAlert";
 
 interface AuthContextType {
-    role: string | null
+    role: string
     token: string
     loginAction: (username: string, password: string) => void
     logOut: () => void
@@ -13,8 +14,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
-  const [role, setRole] = useState<string | null>(null);
-  const [token, setToken] = useState(localStorage.getItem("fos:user") || "");
+  const { showAlert } = useAlert();
+  const [role, setRole] = useState<string>(localStorage.getItem(PersistenceKeys.ROLE) || "");
+  const [token, setToken] = useState(localStorage.getItem(PersistenceKeys.TOKEN) || "");
 
   const loginAction = async (username: string, password: string) => {
     try {
@@ -22,16 +24,19 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const data = response.data as LoginData;
       setRole(data.role);
       setToken(data.token);
+      localStorage.setItem(PersistenceKeys.TOKEN, data.token);
+      localStorage.setItem(PersistenceKeys.ROLE, data.role);
       return;
     } catch (error) {
-      console.log(error);
+      showAlert(`Usuario o Contraseña incorrectos`, 'error');
     }
   }
 
   const logOut = () => {
-    setRole(null);
+    setRole("");
     setToken("");
-    localStorage.removeItem("fos:user");
+    localStorage.removeItem(PersistenceKeys.TOKEN);
+    localStorage.removeItem(PersistenceKeys.ROLE);
   }
 
 
