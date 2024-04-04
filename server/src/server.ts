@@ -21,6 +21,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware";
 import { onNewWebSocketConnection } from './services/socket.service';
 import { PaymentMethods } from './constants';
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData, CustomRequest } from './types';
+import { protectRoutes } from "./middleware/authMiddleware";
 
 const app: Express = express();
 const httpServer = http.createServer(app);
@@ -47,11 +48,11 @@ app.use("/v1/table", tableRoutes);
 app.use("/v1/order", orderRoutes);
 app.use("/v1/menu", menuRoutes);
 app.post("/v1/login", authUser);
-app.use("/v1/admin/menu", admMenuRoutes);
-app.use("/v1/admin/order", admOrderRoutes);
-app.use("/v1/admin/table", admTableRoutes);
-app.use("/v1/admin/user", admUserRoutes);
-app.use("/v1/admin/dashboard", admDashboardRoutes);
+app.use("/v1/admin/menu", protectRoutes, admMenuRoutes);
+app.use("/v1/admin/order", protectRoutes, admOrderRoutes);
+app.use("/v1/admin/table", protectRoutes, admTableRoutes);
+app.use("/v1/admin/user", protectRoutes, admUserRoutes);
+app.use("/v1/admin/dashboard", protectRoutes, admDashboardRoutes);
 
 app.use(express.static(path.join(__dirname, '../../client/dist')));
 
