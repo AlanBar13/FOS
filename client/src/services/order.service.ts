@@ -1,19 +1,26 @@
-import { api } from "../utils/apiClient";
 import { RawOrder, UpdateOrder } from '../models/Order';
-import { AxiosResponse } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
-export const fetchOrders = async () : Promise<RawOrder[]> => {
-    return (await api.get('/admin/order')).data;
-}
+export class OrderService {
+    private _apiService: AxiosInstance;
 
-export const fetchOrder = async (id: string) : Promise<RawOrder>  => {
-    return (await api.get<RawOrder>(`/admin/order/${id}`)).data;
-}
+    constructor(apiService: AxiosInstance){
+        this._apiService = apiService;
+    }
 
-export const updateOrder = async (id: string, updatedOrder: UpdateOrder): Promise<RawOrder> => {
-    return (await api.patch(`/admin/order/${id}`, updatedOrder)).data as RawOrder;
-}
-
-export const deleteItem = async (id: string, itemId: number): Promise<AxiosResponse> => {
-    return await api.delete(`/admin/order/${id}/items/${itemId}`);
+    async fetchOrders() : Promise<RawOrder[]> {
+        return (await this._apiService.get('/admin/order')).data;
+    }
+    
+    async fetchOrder(id: string) : Promise<RawOrder>  {
+        return (await this._apiService.get<RawOrder>(`/admin/order/${id}`)).data;
+    }
+    
+    async updateOrder(id: string, updatedOrder: UpdateOrder): Promise<RawOrder> {
+        return (await this._apiService.patch(`/admin/order/${id}`, updatedOrder)).data;
+    }
+    
+    async deleteItem(id: string, itemId: number): Promise<AxiosResponse> {
+        return await this._apiService.delete(`/admin/order/${id}/items/${itemId}`);
+    }
 }

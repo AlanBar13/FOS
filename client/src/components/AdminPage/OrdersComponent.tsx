@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RawOrder } from '../../models/Order';
 import { Table } from '../../models/Table';
-import { fetchOrders } from '../../services/order.service';
-import { fetchTables, createOrder } from '../../services/table.service';
+import { useApi } from '../../hooks/ApiProvider';
 import { useAlert } from '../../hooks/useAlert';
 
 import AdminAppBarComponent from './Shared/AdminAppBarComponent';
@@ -20,6 +19,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { AxiosError } from 'axios';
 
 export default function OrdersComponent(){
+    const api = useApi();
     const [orders, setOrders] = useState<RawOrder[]>([]);
     const [tables, setTables] = useState<Table[]>([]);
     const [selection, setSelection] = useState<string>("");
@@ -29,10 +29,10 @@ export default function OrdersComponent(){
     useEffect(() => {
         const getData = async () => {
             try {
-                const orders = await fetchOrders();
+                const orders = await api.order.fetchOrders();
                 setOrders(orders);
 
-                const tables = await fetchTables();
+                const tables = await api.table.fetchTables();
                 setTables(tables);
             }catch(error){
                 showAlert(`Error del servidor`, "error");
@@ -71,7 +71,7 @@ export default function OrdersComponent(){
         }
 
         try {
-            const order = await createOrder(selection);
+            const order = await api.table.createOrder(selection);
             setOrders([order, ...orders]);
             setOpen(false);
             setSelection("");

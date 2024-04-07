@@ -2,11 +2,9 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { RawOrder, UpdateOrder, getOrderStatusSring, RawMenu } from '../../../models/Order';
 import { useAlert } from '../../../hooks/useAlert';
-import { updateOrder, fetchOrder, deleteItem } from '../../../services/order.service';
-import { fetchMenu } from '../../../services/menu.service';
+import { useApi } from '../../../hooks/ApiProvider';
 import { formatPriceFixed } from '../../../utils/numbers';
 import { formatStringDate } from '../../../utils/dates';
-import { addOrderItem } from '../../../services/table.service';
 import { AddToDashboardItems } from '../../../models/SocketModels';
 import { SocketEvents, socket } from '../../../utils/socketClient';
 
@@ -33,6 +31,7 @@ import "./OrderPreviewComponent.css"
 export default function OrderPreviewComponent() {
     const { id } = useParams();
     const { showAlert } = useAlert();
+    const api = useApi();
     const [isLoading, setisLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [selection, setSelection] = useState("");
@@ -48,7 +47,7 @@ export default function OrderPreviewComponent() {
                     return;
                 }
 
-                const order = await fetchOrder(id);
+                const order = await api.order.fetchOrder(id);
                 setData(order);
             } catch (error) {
                 showAlert(`Error: ${(error as Error).message}`, 'error');
@@ -65,7 +64,7 @@ export default function OrderPreviewComponent() {
 
         setisLoading(true);
         try {
-            const newOrder = await updateOrder(id, updatedOrder);
+            const newOrder = await api.order.updateOrder(id, updatedOrder);
             if (data){
                 setData({...data, status: newOrder.status, tips: newOrder.tips})
             }
@@ -81,7 +80,7 @@ export default function OrderPreviewComponent() {
         }
 
         try {
-            await deleteItem(id, itemId)
+            await api.order.deleteItem(id, itemId)
             window.location.reload();
         } catch (error) {
             showAlert(`Error: ${(error as Error).message}`, 'error');
@@ -94,7 +93,7 @@ export default function OrderPreviewComponent() {
 
     const handleOpen = async () => {
         try {
-            const menu = await fetchMenu();
+            const menu = await api.menu.fetchMenu();
             setMenu(menu);
             setOpen(true);
         } catch (error) {
@@ -132,7 +131,7 @@ export default function OrderPreviewComponent() {
             }
             
             setModalLoading(true);
-            const newOrderItem = await addOrderItem(`${data.tableId}`, data.id, {
+            const newOrderItem = await api.table.addOrderItem(`${data.tableId}`, data.id, {
                 menuId: parseInt(selection),
                 qty: qty
             });

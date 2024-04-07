@@ -4,7 +4,7 @@ import { PersistenceKeys } from "./constants";
 class ApiClient {
     private instance: AxiosInstance | null = null;
 
-    private get http(): AxiosInstance {
+    public get http(): AxiosInstance {
         return this.instance != null ? this.instance : this.initHttp();
     }
 

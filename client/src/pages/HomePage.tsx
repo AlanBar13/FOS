@@ -1,8 +1,8 @@
 import { useEffect, useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '../models/Table';
-import { fetchTables } from '../services/table.service';
 import { useAlert } from '../hooks/useAlert';
+import { useApi } from '../hooks/ApiProvider';
 import {Box} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
@@ -13,6 +13,7 @@ import AppLayout from '../components/Shared/AppLayout';
 export default function HomePage(){
     const navigate = useNavigate();
     const { showAlert } = useAlert();
+    const api = useApi();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
     const [selection, setSelection] = useState<string>("");
     const [tables, setTables] = useState<Table[]>([]);
@@ -34,7 +35,7 @@ export default function HomePage(){
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const tables = await fetchTables();
+                const tables = await api.table.fetchTables();
                 setTables(tables);
             } catch (error) {
                 showAlert('Error con el servidor', 'error');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchMenuAll, deleteMenuItem } from '../../services/menu.service';
+import { useApi } from '../../hooks/ApiProvider';
 import { Menu } from '../../models/Menu';
 import { useAlert } from '../../hooks/useAlert';
 
@@ -18,6 +18,7 @@ import DialogComponent from '../Shared/DialogComponent';
 
 export default function MenuComponent(){
     const {showAlert} = useAlert();
+    const api = useApi();
     const [menu, setMenu] = useState<Menu[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
@@ -29,7 +30,7 @@ export default function MenuComponent(){
         const fetchMenuData = async () => {
             setIsLoading(true);
             try {
-                const menu = await fetchMenuAll();
+                const menu = await api.menu.fetchMenuAll();
                 setMenu(menu);
             } catch (error) {
                 showAlert('Error con el servidor', 'error');
@@ -81,7 +82,7 @@ export default function MenuComponent(){
 
     const onDeleteConfirm = async () => {
         try {
-            await deleteMenuItem(itemDelete.id);
+            await api.menu.deleteMenuItem(itemDelete.id);
             deleteItem(itemDelete.id);
             showAlert('Producto eliminado correctamente', 'success');
         } catch (error) {

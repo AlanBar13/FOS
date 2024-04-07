@@ -1,5 +1,6 @@
 import { useState, useMemo, ChangeEvent } from 'react';
 import { useAlert } from '../../../hooks/useAlert';
+import { useApi } from '../../../hooks/ApiProvider';
 
 import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
@@ -17,7 +18,6 @@ import {Box} from '@mui/material';
 
 import { foodCategories } from '../../../utils/constants';
 import { Menu } from '../../../models/Menu';
-import { uploadImage, addMenuItem, updateMenuItem } from '../../../services/menu.service';
 
 interface AddItemComponentProps {
     menu?: Menu | null
@@ -59,6 +59,7 @@ const defaultItem : Menu = {
 
 export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdateItem, onCancel }: AddItemComponentProps){
     const { showAlert } = useAlert();
+    const api = useApi();
     const [item, setItem] = useState<Menu>(menu !== null ? menu : defaultItem);
     const [imageLoading, setImageLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -115,7 +116,7 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
             const file = event.target.files[0];
             const formData = new FormData();
             formData.append('img', file);
-            const response = await uploadImage(formData);
+            const response = await api.menu.uploadImage(formData);
             setItem({...item, img: response.data.url});
             setUploadText(`Imagen cargada correctamente: ${file.name}`);
         } catch (error) {
@@ -130,7 +131,7 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
         setIsLoading(true);
         if (edit && menu !== null) {
             try {
-                const updatedItem = await updateMenuItem(item, menu.id!);
+                const updatedItem = await api.menu.updateMenuItem(menu.id!, item);
                 onUpdateItem!(updatedItem);
                 setItem(defaultItem);
                 setUploadText("");
@@ -142,7 +143,7 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
             onCancel!()
         }else {
             try {
-                const newItem = await addMenuItem(item);
+                const newItem = await api.menu.addMenuItem(item);
                 onAddItem(newItem);
                 setItem(defaultItem);
                 setUploadText("");

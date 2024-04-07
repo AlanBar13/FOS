@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table } from '../../models/Table';
-import { fetchTables, createMultipleTables, deleteTables } from '../../services/table.service';
+import { useApi } from '../../hooks/ApiProvider';
 
 import {Box} from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -11,6 +11,7 @@ import AddTableComponent from './Tables/AddTableComponent';
 import DialogComponent from '../Shared/DialogComponent';
 
 export default function TablesComponent(){
+    const api = useApi();
     const [tables, setTables] = useState<Table[]>([]);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -19,7 +20,7 @@ export default function TablesComponent(){
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetchTables();
+                const res = await api.table.fetchTables();
                 setTables(res);
             } catch (error) {
                 console.log(error)
@@ -33,8 +34,7 @@ export default function TablesComponent(){
     const createTables = async(amount: number) => {
         setIsLoading(true);
         try {
-            const res = await createMultipleTables(amount, `${window.location.origin}/menu`);
-            const newTables = res.data as Table[];
+            const newTables = await api.table.createMultipleTables(amount, `${window.location.origin}/menu`);
             const newList = tables.concat(newTables);
             setTables(newList);
         } catch (error) {
@@ -51,7 +51,7 @@ export default function TablesComponent(){
         }
 
         try {
-            await deleteTables();
+            await api.table.deleteTables();
             setTables([]);
         } catch (error) {
             console.log(error)

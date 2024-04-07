@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { UserData } from '../../hooks/useUser';
 import { useAuth } from '../../hooks/AuthProvider';
 
 import Drawer from '@mui/material/Drawer';
@@ -20,7 +19,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 
 interface AdminDrawerProps {
     drawerWidth: number
-    user?: UserData | null
 }
 
 const pages = [

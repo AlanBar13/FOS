@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Cart } from '../models/Cart';
 import { RawMenu, RawOrderItem } from '../models/Order';
 import { FeedbackType } from '../models/SocketModels';
-import { fetchMenu } from '../services/menu.service';
-import { createOrder, addOrderItem, getActiveOrder } from '../services/table.service';
+import { useApi } from '../hooks/ApiProvider';
 import { useQuery } from '../hooks/useQuery';
 import { socket, SocketEvents } from '../utils/socketClient';
 import { useAlert } from '../hooks/useAlert';
@@ -40,6 +39,7 @@ const Puller = styled(Box)(({ theme }) => ({
 
 export default function MenuPage(){
     const { showAlert } = useAlert();
+    const api = useApi();
     const dispatch = useCurrentOrderDispatch();
     const query = useQuery();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
@@ -96,7 +96,7 @@ export default function MenuPage(){
                 if(tableId !== null){
                     const room = `table:${tableId}`;
                     socket.emit("join", room)
-                    const order = await getActiveOrder(tableId);
+                    const order = await api.table.getActiveOrder(tableId);
                     setOrderId(order.id);
                     if(order.OrderItems){
                         dispatch({
@@ -108,7 +108,7 @@ export default function MenuPage(){
                     }
                 }
 
-                const menu = await fetchMenu();
+                const menu = await api.menu.fetchMenu();
                 setMenu(menu);
             } catch (error) {
                 showAlert(`Error ${(error as Error).message}`, 'error')
@@ -129,7 +129,7 @@ export default function MenuPage(){
         await Promise.all(
             cart.map(async (crt) => {
                 try {
-                    const newOrderItem = await addOrderItem(tableId, orderIdToUpdate, {
+                    const newOrderItem = await api.table.addOrderItem(tableId, orderIdToUpdate, {
                         menuId: crt.item.id,
                         qty: crt.qty,
                         //TODO: add comments
@@ -164,7 +164,7 @@ export default function MenuPage(){
         if (orderId == null){
             console.log('no active order')
             try {
-                const orderCreated = await createOrder(tableId);
+                const orderCreated = await api.table.createOrder(tableId);
                 setOrderId(orderCreated.id);
                 await addItemToCart(orderCreated.id);
             } catch (error) {
