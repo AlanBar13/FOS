@@ -10,6 +10,7 @@ import admTableRoutes from "./routes/admin/table.routes";
 import admOrderRoutes from "./routes/admin/order.routes";
 import admUserRoutes from "./routes/admin/user.routes";
 import admDashboardRoutes from "./routes/admin/dashboard.routes";
+import admCategoriesRoutes from "./routes/admin/categories.routes";
 import tableRoutes from "./routes/public/table.routes";
 import orderRoutes from "./routes/public/order.routes";
 import menuRoutes from './routes/public/menu.routes';
@@ -44,6 +45,7 @@ app.get("/v1/paymentMethods", (req, res) => {
     res.json(PaymentMethods.paymentMethods);
 });
 
+// API routes
 app.use("/v1/table", tableRoutes);
 app.use("/v1/order", orderRoutes);
 app.use("/v1/menu", menuRoutes);
@@ -53,7 +55,9 @@ app.use("/v1/admin/order", protectRoutes, admOrderRoutes);
 app.use("/v1/admin/table", protectRoutes, admTableRoutes);
 app.use("/v1/admin/user", protectRoutes, admUserRoutes);
 app.use("/v1/admin/dashboard", protectRoutes, admDashboardRoutes);
+app.use("/v1/admin/categories", protectRoutes, admCategoriesRoutes);
 
+// Serve web page
 app.use(express.static(path.join(__dirname, '../../client/dist')));
 
 app.get("*", (req, res) => {

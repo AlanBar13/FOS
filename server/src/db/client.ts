@@ -1,11 +1,13 @@
-import { PrismaClient, enum_Users_role } from '@prisma/client';
+import { Prisma, PrismaClient, enum_Users_role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { JWTUser } from '../types';
+import { excludeFields } from './utils';
 
 const prisma = new PrismaClient().$extends({
     model: {
         users: {
             async signup(email: string, password: string, role: enum_Users_role) {
+                const select = excludeFields<Prisma.UsersFieldRefs>(prisma.users.fields, ["password"]);
                 const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(password, salt);
                 const newUser = await prisma.users.create({
@@ -15,7 +17,8 @@ const prisma = new PrismaClient().$extends({
                         role: role,
                         createdAt: new Date(),
                         updatedAt: new Date(),
-                    }
+                    },
+                    select
                 });
 
                 return newUser;
