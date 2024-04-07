@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { User } from "../../models/Users";
 import { useAlert } from "../../hooks/useAlert";
-import { createUser, deleteUser, fetchUsers } from "../../services/user.service";
+import { useApi } from "../../hooks/ApiProvider";
 
 import AdminAppBarComponent from "./Shared/AdminAppBarComponent";
 import UserTableComponent from "./Users/UserTableComponent";
@@ -15,6 +15,7 @@ import DialogComponent from "../Shared/DialogComponent";
 
 export default function UsersComponent(){
     const { showAlert } = useAlert();
+    const api = useApi();
     const [users, setUsers] = useState<User[]>([]);
     const [open, setOpen] = useState<boolean>(false);
     const [openInfo, setOpenInfo] = useState<boolean>(false);
@@ -25,7 +26,7 @@ export default function UsersComponent(){
         const getData = async () => {
             setLoading(true);
             try {
-                const users = await fetchUsers();
+                const users = await api.user.fetchUsers();
                 setUsers(users);
             } catch (error) {
                 if (axios.isAxiosError(error)){
@@ -49,8 +50,7 @@ export default function UsersComponent(){
 
     const createNewUser = async (username: string, password: string, role: string) => {
         setLoading(true);
-        const response = await createUser(username, password, role);
-        const newUser = response.data as User;
+        const newUser = await api.user.createUser(username, password, role);
         setUsers([...users, newUser]);
         closeModal();
         setLoading(false);
@@ -65,7 +65,7 @@ export default function UsersComponent(){
         setLoading(true);
         try {
             if(userToDelete){
-                await deleteUser(userToDelete.id)
+                await api.user.deleteUser(userToDelete.id)
                 const newUserList = users.filter((user) => user.id !== userToDelete.id);
                 setUsers(newUserList);
             }else{

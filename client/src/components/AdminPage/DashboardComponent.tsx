@@ -3,6 +3,7 @@ import { useSocketEvents, SocketEvent } from '../../hooks/useSocketEvents';
 import { DashboardItems } from '../../models/SocketModels';
 import { SocketEvents } from '../../utils/socketClient';
 import { useAlert } from '../../hooks/useAlert';
+import { useApi } from '../../hooks/ApiProvider';
 
 import AdminAppBarComponent from './Shared/AdminAppBarComponent';
 import DashboardItem from './Dashboard/DashboardItem';
@@ -12,9 +13,9 @@ import ImageListItem from '@mui/material/ImageListItem';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
-import { getDashboardItems } from '../../services/dashboard.service';
 
 export default function DashboardComponent(){
+    const api = useApi();
     const [pendingOrders, setPendingOrders] = useState<DashboardItems[]>([]);
     const [preparingOrders, setPreparingOrders] = useState<DashboardItems[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -48,7 +49,7 @@ export default function DashboardComponent(){
         const getData = async () => {
             setLoading(true);
             try {
-                const dashboardItems = await getDashboardItems();
+                const dashboardItems = await api.dashboard.getDashboardItems();
 
                 setPendingOrders(dashboardItems.toPrepare);
                 setPreparingOrders(dashboardItems.inKitchen);

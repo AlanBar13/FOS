@@ -1,28 +1,36 @@
-import { api } from "../utils/apiClient";
 import { Table } from "../models/Table";
 import { AddItemToOrder, RawOrder, RawOrderItem } from "../models/Order";
-import { AxiosResponse } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
-export const fetchTables = async (): Promise<Table[]> => {
-    return (await api.get("/table")).data;
-}
+export class TableService {
+    private _apiService: AxiosInstance;
 
-export const createMultipleTables = async (amount: number, url: string): Promise<AxiosResponse> => {
-    return await api.post(`/admin/table/multiple/${amount}`, {url});
-}
+    constructor(apiService: AxiosInstance){
+        this._apiService = apiService;
+    }
 
-export const deleteTables = async (): Promise<AxiosResponse> => {
-    return await api.delete(`/admin/table/destroy`);
-}
-
-export async function getActiveOrder(tableId: string): Promise<RawOrder> {
-    return (await api.get(`/table/${tableId}/order`)).data as RawOrder;
-}
-
-export const createOrder = async (tableId: string): Promise<RawOrder> => {
-    return (await api.post(`/table/${tableId}/order`)).data;
-}
-
-export const addOrderItem = async (tableId: string, order: number, item: AddItemToOrder): Promise<RawOrderItem> => {
-    return (await api.post(`/table/${tableId}/order/${order}/add`, item)).data as RawOrderItem;
+    async fetchTables(): Promise<Table[]> {
+        return (await this._apiService.get<Table[]>("/table")).data;
+    }
+    
+    async createMultipleTables(amount: number, url: string): Promise<Table[]> {
+        const response = await this._apiService.post<Table[]>(`/admin/table/multiple/${amount}`, {url});
+        return response.data;
+    }
+    
+    async deleteTables(): Promise<AxiosResponse> {
+        return await this._apiService.delete(`/admin/table/destroy`);
+    }
+    
+    async getActiveOrder(tableId: string): Promise<RawOrder> {
+        return (await this._apiService.get<RawOrder>(`/table/${tableId}/order`)).data;
+    }
+    
+    async createOrder(tableId: string): Promise<RawOrder> {
+        return (await this._apiService.post(`/table/${tableId}/order`)).data;
+    }
+    
+    async addOrderItem(tableId: string, order: number, item: AddItemToOrder): Promise<RawOrderItem> {
+        return (await this._apiService.post(`/table/${tableId}/order/${order}/add`, item)).data;
+    }
 }

@@ -1,28 +1,41 @@
-import { AxiosResponse } from 'axios'
-import { api } from "../utils/apiClient";
+import { AxiosInstance, AxiosResponse } from 'axios'
 import { Menu } from "../models/Menu";
 import { RawMenu } from '../models/Order';
 
-export const fetchMenu = async () : Promise<RawMenu[]> => {
-    return (await api.get('/menu?onlyAvailable=true')).data;
-}
+export class MenuService {
+    private _apiService: AxiosInstance;
 
-export const fetchMenuAll = async () : Promise<Menu[]> => {
-    return (await api.get('/menu')).data;
-}
+    constructor(apiService: AxiosInstance){
+        this._apiService = apiService;
+    }
 
-export const addMenuItem = async (item: Menu) : Promise<Menu> => {
-    return (await api.post('/admin/menu', item)).data;
-}
+    async fetchMenu(): Promise<RawMenu[]> {
+        const response = await this._apiService.get<RawMenu[]>(`/menu?onlyAvailable=true`);
+        return response.data;
+    }
 
-export const updateMenuItem = async (item: Menu, id: number) : Promise<Menu> => {
-    return (await api.patch(`/admin/menu/${id}`, item)).data;
-}
+    async fetchMenuAll(): Promise<Menu[]> {
+        const response = await this._apiService.get<Menu[]>(`/menu`);
+        return response.data;
+    }
 
-export const deleteMenuItem = async (id: number) : Promise<Menu> => {
-    return (await api.delete(`/admin/menu/${id}`)).data;
-}
+    async addMenuItem(item: Menu): Promise<Menu> {
+        const response = await this._apiService.post<Menu>(`/admin/menu`, item);
+        return response.data;
+    }
 
-export const uploadImage = async (formData: FormData) : Promise<AxiosResponse> => {
-    return await api.post("/admin/menu/image/upload", formData, { headers: {"Content-Type": "multipart/form-data"}})
+    async updateMenuItem(id: number, menu: Menu): Promise<Menu> {
+        const response = await this._apiService.patch<Menu>(`/admin/menu/${id}`, menu);
+        return response.data;
+    }
+
+    async deleteMenuItem(id: number) : Promise<AxiosResponse> {
+        const response = await this._apiService.delete(`/admin/menu/${id}`);
+        return response;
+    }
+
+    async uploadImage(formData: FormData) : Promise<AxiosResponse>{
+        const response = await this._apiService.post("/admin/menu/image/upload", formData, { headers: {"Content-Type": "multipart/form-data"}});
+        return response;
+    }
 }

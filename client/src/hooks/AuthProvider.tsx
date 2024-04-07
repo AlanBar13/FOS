@@ -1,8 +1,7 @@
 import { useContext, createContext, useState, PropsWithChildren } from "react";
-import { loginUser } from "../services/user.service";
-import { LoginData } from "../models/Users";
 import { PersistenceKeys } from "../utils/constants";
 import { useAlert } from "./useAlert";
+import { useApi } from "./ApiProvider";
 
 interface AuthContextType {
     role: string
@@ -15,13 +14,13 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const { showAlert } = useAlert();
+  const api = useApi();
   const [role, setRole] = useState<string>(localStorage.getItem(PersistenceKeys.ROLE) || "");
   const [token, setToken] = useState(localStorage.getItem(PersistenceKeys.TOKEN) || "");
 
   const loginAction = async (username: string, password: string) => {
     try {
-      const response = await loginUser(username, password);
-      const data = response.data as LoginData;
+      const data = await api.user.loginUser(username, password);
       setRole(data.role);
       setToken(data.token);
       localStorage.setItem(PersistenceKeys.TOKEN, data.token);
