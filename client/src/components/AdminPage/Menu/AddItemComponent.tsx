@@ -1,6 +1,8 @@
-import { useState, useMemo, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent, useEffect } from 'react';
 import { useAlert } from '../../../hooks/useAlert';
 import { useApi } from '../../../hooks/ApiProvider';
+import { Menu } from '../../../models/Menu';
+import { Category } from '../../../models/Category';
 
 import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
@@ -16,9 +18,6 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CircularProgress from '@mui/material/CircularProgress';
 import {Box} from '@mui/material';
 
-import { foodCategories } from '../../../utils/constants';
-import { Menu } from '../../../models/Menu';
-
 interface AddItemComponentProps {
     menu?: Menu | null
     edit?: boolean
@@ -26,13 +25,6 @@ interface AddItemComponentProps {
     onUpdateItem?: (updatedItem: Menu) => void
     onCancel?: () => void
 }
-
-const options = foodCategories.map(category => {
-    return {
-        label: category,
-        value: category
-    }
-});
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -61,10 +53,24 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
     const { showAlert } = useAlert();
     const api = useApi();
     const [item, setItem] = useState<Menu>(menu !== null ? menu : defaultItem);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [imageLoading, setImageLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [uploadText, setUploadText] = useState<string>("");
     const disabled = useMemo(() => (!(item.name !== "" && item.category !== "" && item.price !== 0 && !imageLoading)), [item, imageLoading]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const categories = await api.category.fetchCategories();
+                setCategories(categories);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        fetchData();
+    }, []);
 
     const handleNameChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setItem({...item, name: event.target.value });
@@ -164,8 +170,8 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
                 </Grid>
                 <Grid item  xs={6}>
                     <TextField fullWidth label="Categoria" required select value={item.category} onChange={handleCategoryChange} >
-                        {options.map(option => (
-                            <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        {categories.map(category => (
+                            <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
                         ))}
                     </TextField>
                 </Grid>

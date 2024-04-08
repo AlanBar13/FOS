@@ -6,6 +6,7 @@ import { TableService } from "../services/table.service";
 import { UserService } from "../services/user.service";
 import { OrderService } from "../services/order.service";
 import { DashboardService } from "../services/dashboard.service";
+import { CategoryService } from "../services/categories.service";
 
 const ApiContext = createContext<ApiService | null>(null);
 
@@ -15,7 +16,8 @@ const ApiProvider = ({ children }: PropsWithChildren) => {
     const userService = new UserService(api.http);
     const orderService = new OrderService(api.http);
     const dashboardService = new DashboardService(api.http);
-    const apiService = new ApiService(menuService, tableService, orderService, dashboardService, userService);
+    const categoryService = new CategoryService(api.http);
+    const apiService = new ApiService(menuService, tableService, orderService, dashboardService, userService, categoryService);
 
     return (
         <ApiContext.Provider value={apiService}>
