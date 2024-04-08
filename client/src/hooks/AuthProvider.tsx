@@ -45,5 +45,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 export default AuthProvider;
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+    if(!authContext){
+        throw new Error("useAuth has to be used within <AuthProvider>")
+    }
+    return authContext;
 };

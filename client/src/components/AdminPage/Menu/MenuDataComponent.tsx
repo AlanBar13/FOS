@@ -147,7 +147,7 @@ export default function MenuDataComponent({ menu, onMenuChange, onDeleteClicked,
                                 <TableCell component="th" scope='row'>{item.name}</TableCell>
                                 <TableCell>{item.description}</TableCell>
                                 <TableCell>{item.available ? <Chip color='success' label="Disponible" /> : <Chip color='error' label="No Disponible" />}</TableCell>
-                                <TableCell>{item.category}</TableCell>
+                                <TableCell>{item.Category?.name ?? ""}</TableCell>
                                 <TableCell>{formatPriceFixed(item.price)}</TableCell>
                                 <TableCell>{formatPriceFixed(item.tax ? item.tax : 0)}</TableCell>
                                 <TableCell>{item.img !== null ? <Chip color='primary' label="Agregada" /> : <Chip label="No Agregada" />}</TableCell>

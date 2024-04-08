@@ -1,7 +1,7 @@
-import { useState, useMemo, ChangeEvent, useEffect } from 'react';
+import { useState, useMemo, ChangeEvent } from 'react';
 import { useAlert } from '../../../hooks/useAlert';
 import { useApi } from '../../../hooks/ApiProvider';
-import { Menu } from '../../../models/Menu';
+import { Menu, UpdateMenu } from '../../../models/Menu';
 import { Category } from '../../../models/Category';
 
 import { styled } from '@mui/material/styles';
@@ -21,6 +21,7 @@ import {Box} from '@mui/material';
 interface AddItemComponentProps {
     menu?: Menu | null
     edit?: boolean
+    categories: Category[]
     onAddItem: (newItem: Menu) => void
     onUpdateItem?: (updatedItem: Menu) => void
     onCancel?: () => void
@@ -42,35 +43,21 @@ const defaultItem : Menu = {
     name: "",
     description: "",
     available: false,
-    category: "",
+    categoryId: 0,
     price: 0,
     tax: 0,
     prepTime: "",
     img: undefined
 }
 
-export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdateItem, onCancel }: AddItemComponentProps){
+export default function AddItemComponent({ menu = null, edit, categories, onAddItem, onUpdateItem, onCancel }: AddItemComponentProps){
     const { showAlert } = useAlert();
     const api = useApi();
     const [item, setItem] = useState<Menu>(menu !== null ? menu : defaultItem);
-    const [categories, setCategories] = useState<Category[]>([]);
     const [imageLoading, setImageLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [uploadText, setUploadText] = useState<string>("");
-    const disabled = useMemo(() => (!(item.name !== "" && item.category !== "" && item.price !== 0 && !imageLoading)), [item, imageLoading]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const categories = await api.category.fetchCategories();
-                setCategories(categories);
-            } catch (error) {
-                console.log(error)
-            }
-        }
-
-        fetchData();
-    }, []);
+    const disabled = useMemo(() => (!(item.name !== "" && item.categoryId !== 0 && item.price !== 0 && !imageLoading)), [item, imageLoading]);
 
     const handleNameChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setItem({...item, name: event.target.value });
@@ -85,7 +72,11 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
     }
     
     const handleCategoryChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setItem({...item, category: event.target.value });
+        if (event.target.value === "") {
+            setItem({...item, categoryId: 0 });
+        }else{
+            setItem({...item, categoryId: Number(event.target.value) });
+        }
     }
 
     const handlePriceChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -137,7 +128,17 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
         setIsLoading(true);
         if (edit && menu !== null) {
             try {
-                const updatedItem = await api.menu.updateMenuItem(menu.id!, item);
+                const updatedItemData: UpdateMenu = {
+                    name: item.name,
+                    description: item.description,
+                    available: item.available,
+                    categoryId: item.categoryId,
+                    price: item.price,
+                    tax: item.tax,
+                    img: item.img,
+                    prepTime: item.prepTime
+                }
+                const updatedItem = await api.menu.updateMenuItem(menu.id!, updatedItemData);
                 onUpdateItem!(updatedItem);
                 setItem(defaultItem);
                 setUploadText("");
@@ -150,6 +151,7 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
         }else {
             try {
                 const newItem = await api.menu.addMenuItem(item);
+                console.log(newItem)
                 onAddItem(newItem);
                 setItem(defaultItem);
                 setUploadText("");
@@ -169,7 +171,8 @@ export default function AddItemComponent({ menu = null, edit, onAddItem, onUpdat
                     <TextField fullWidth label="Nombre" required value={item.name} onChange={handleNameChange} />
                 </Grid>
                 <Grid item  xs={6}>
-                    <TextField fullWidth label="Categoria" required select value={item.category} onChange={handleCategoryChange} >
+                    <TextField fullWidth label="Categoria" required select value={item.categoryId} onChange={handleCategoryChange} >
+                    <MenuItem value={0}>Elige Categoria...</MenuItem>
                         {categories.map(category => (
                             <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
                         ))}

@@ -5,29 +5,47 @@ import logger from "../utils/logger";
 import cache from "../utils/cache";
 import db from '../db/client';
 
+interface MenuInput extends Prisma.MenuCreateInput {
+    categoryId: number
+}
+
 export const getMenuItems = asyncHandler(async (req: Request, res: Response) => {
     const { onlyAvailable } = req.query;
     const boolAvailable = Boolean(onlyAvailable);
 
     let allMenu;
     if (boolAvailable){
-        allMenu = await db.menu.findMany({ where: { available: boolAvailable }});
+        allMenu = await db.menu.findMany({ where: { available: boolAvailable }, include: { Category: true }});
     }else {
-        allMenu = await db.menu.findMany();
+        allMenu = await db.menu.findMany({include: { Category: true }});
     }
 
-    cache.set(req.originalUrl, allMenu, 120);
+    cache.set(req.originalUrl, allMenu, 60);
     res.json(allMenu);
 })
 
 export const registerMenuItem = asyncHandler(async (req: Request, res: Response) => {
-    const payload: Prisma.MenuCreateInput = req.body;
+    const payload: MenuInput = req.body;
 
     const menuItem = await db.menu.create({
         data: {
-            ...payload,
+            name: payload.name,
+            description: payload.description,
+            available: payload.available,
+            price: payload.price,
+            tax: payload.tax,
+            img: payload.img,
+            prepTime: payload.prepTime,
+            Category: {
+                connect: {
+                    id: payload.categoryId
+                }
+            },
             createdAt: new Date(),
             updatedAt: new Date()
+        },
+        include: {
+            Category: true
         }
     });
 
@@ -46,7 +64,7 @@ export const updateItem = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const payload: Prisma.MenuCreateInput = req.body;
 
-    const menuItem = await db.menu.update({ where: { id }, data : {...payload, updatedAt: new Date() }});
+    const menuItem = await db.menu.update({ where: { id }, data : {...payload, updatedAt: new Date() }, include: { Category: true }});
 
     res.json(menuItem)
 })

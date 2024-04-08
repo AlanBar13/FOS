@@ -29,7 +29,7 @@ function Copyright(props: any) {
 
 export default function LoginPage() {
     const { showAlert } = useAlert();
-    const user = useAuth();
+    const auth = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -40,8 +40,8 @@ export default function LoginPage() {
             const data = new FormData(event.currentTarget);
             const username = data.get('user');
             const password = data.get('password');
-            if (username && password && user) {
-                await user.loginAction(username.toString(), password.toString());
+            if (username && password) {
+                await auth.loginAction(username.toString(), password.toString());
                 return navigate(`/admin`, { replace: true });
             }else{
                 showAlert("Usuario o Contraseña vacios", "warning");

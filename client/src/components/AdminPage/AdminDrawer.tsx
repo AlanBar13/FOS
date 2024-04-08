@@ -49,9 +49,7 @@ export default function AdminDrawer({ drawerWidth = 240 }: AdminDrawerProps){
     const auth = useAuth();
 
     const logout = () => {
-        if(auth){
-            auth.logOut()
-        }
+        auth.logOut();
     }
 
     const navigateToRoute = (path: string) => {

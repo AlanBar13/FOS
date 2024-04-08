@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
-import { Menu } from "../models/Menu";
+import { Menu, UpdateMenu } from "../models/Menu";
 import { RawMenu } from '../models/Order';
 
 export class MenuService {
@@ -24,7 +24,7 @@ export class MenuService {
         return response.data;
     }
 
-    async updateMenuItem(id: number, menu: Menu): Promise<Menu> {
+    async updateMenuItem(id: number, menu: UpdateMenu): Promise<Menu> {
         const response = await this._apiService.patch<Menu>(`/admin/menu/${id}`, menu);
         return response.data;
     }

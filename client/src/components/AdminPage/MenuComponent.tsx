@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/ApiProvider';
 import { Menu } from '../../models/Menu';
+import { Category } from '../../models/Category';
 import { useAlert } from '../../hooks/useAlert';
 
 import CircularProgress from '@mui/material/CircularProgress';
@@ -10,6 +11,9 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DialogContentText from '@mui/material/DialogContentText';
+import FormGroup from '@mui/material/FormGroup';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 import MenuDataComponent from './Menu/MenuDataComponent';
 import AdminAppBarComponent from './Shared/AdminAppBarComponent';
@@ -20,16 +24,20 @@ export default function MenuComponent(){
     const {showAlert} = useAlert();
     const api = useApi();
     const [menu, setMenu] = useState<Menu[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
     const [openEditDialog, setOpenEditDialog] = useState<boolean>(false);
     const [currentItem, setCurrentItem] = useState<Menu | null>(null);
     const [itemDelete, setItemDelete] = useState({id: 0, name: ""});
+    const [categoryName, setCategoryName] = useState("");
 
     useEffect(() => {
         const fetchMenuData = async () => {
             setIsLoading(true);
             try {
+                const categories = await api.category.fetchCategories();
+                setCategories(categories);
                 const menu = await api.menu.fetchMenuAll();
                 setMenu(menu);
             } catch (error) {
@@ -97,6 +105,22 @@ export default function MenuComponent(){
         setCurrentItem(null);
     }
 
+    const addNewCategory = async () => {
+        try {
+            if(categoryName === ""){
+                showAlert('La categoria no puede ser vacia', 'warning');
+                return;
+            }
+
+            const category = await api.category.addCategory({ name: categoryName });
+            setCategories([...categories, category])
+            showAlert(`Categoria ${category.name} añadida correctamente`, 'success');
+            setCategoryName("");
+        } catch (error) {
+            showAlert('Error al añadir la categoria', 'error');
+        }
+    }
+
     return(
         <>
             <AdminAppBarComponent title='Administracion de Menu' />
@@ -106,10 +130,30 @@ export default function MenuComponent(){
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                     >
+                    <Typography>Añadir nueva categoria</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <FormGroup sx={{ marginTop: '0.5rem' }}>
+                        <TextField fullWidth label="Nombre de Categoria" required value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
+                        <br />
+                        <Button fullWidth variant='outlined' onClick={addNewCategory}>Añadir</Button>
+                    </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion sx={{ marginBottom: '1rem'}}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                    >
                     <Typography>Añadir nuevo producto</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <AddItemComponent onAddItem={addMenuItem} />
+                    {categories.length === 0 ? (
+                        <Typography>Añada al menos una categoria para agregar </Typography>
+                    ) : (
+                        <AddItemComponent onAddItem={addMenuItem} categories={categories} />
+                    )}
                 </AccordionDetails>
             </Accordion>
             {isLoading ? <CircularProgress /> : <MenuDataComponent menu={menu} onMenuChange={replaceList} onEditClicked={listEditClicked} onDeleteClicked={listDeleteClicked} />}
@@ -119,7 +163,7 @@ export default function MenuComponent(){
                 </DialogContentText>
             </DialogComponent>
             <DialogComponent isOpen={openEditDialog} title='Editar Producto' enableActions={false} onCancel={onCancel} onConfirm={onEditConfirm}>
-                <AddItemComponent menu={currentItem} edit onAddItem={addMenuItem}  onCancel={onCancel} onUpdateItem={updateItemInList}/>
+                <AddItemComponent menu={currentItem} categories={categories} edit onAddItem={addMenuItem}  onCancel={onCancel} onUpdateItem={updateItemInList}/>
             </DialogComponent>
         </>
     )
