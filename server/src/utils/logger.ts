@@ -6,8 +6,8 @@ const logger = winston.createLogger({
     winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     winston.format.printf(
       (info) =>
-        `[${info.timestamp}] ${info.service} ${info.level}: ${info.message}`
-    )
+        `[${info.timestamp}] ${info.service} ${info.level}: ${info.message}`,
+    ),
   ),
   defaultMeta: { service: "FOS-server" },
   transports: [

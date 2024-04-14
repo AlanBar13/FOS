@@ -12,7 +12,6 @@ model Menu {
   name        String      @db.VarChar(255)
   description String?
   available   Boolean     @default(false)
-  category    String?     @db.VarChar(255)
   price       Float
   tax         Float?
   img         String?
@@ -20,34 +19,36 @@ model Menu {
   createdAt   DateTime    @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime?   @db.Timestamptz(6)
   OrderItem   OrderItem[]
+  categoryId  Int
+  Category    Categories  @relation(fields: [categoryId], references: [id])
 }
 
 model OrderItem {
-  id          Int                     @id @default(autoincrement())
+  id          Int                    @id @default(autoincrement())
   orderId     Int
   menuId      Int
-  qty         Int                     @default(1)
-  comments    String?                 @db.VarChar(255)
-  status      enum_OrderItems_status  @default(ordered)
-  createdAt   DateTime                @default(now()) @db.Timestamptz(6)
-  inKitchenAt DateTime?               @db.Timestamptz(6)
-  doneAt      DateTime?               @db.Timestamptz(6)
-  Menu        Menu                    @relation(fields: [menuId], references: [id])
-  Order       Order                   @relation(fields: [orderId], references: [id])
+  qty         Int                    @default(1)
+  comments    String?                @db.VarChar(255)
+  status      enum_OrderItems_status @default(ordered)
+  createdAt   DateTime               @default(now()) @db.Timestamptz(6)
+  inKitchenAt DateTime?              @db.Timestamptz(6)
+  doneAt      DateTime?              @db.Timestamptz(6)
+  Menu        Menu                   @relation(fields: [menuId], references: [id])
+  Order       Order                  @relation(fields: [orderId], references: [id])
 }
 
 model Order {
-  id           Int                @id @default(autoincrement())
-  tableId      Int
-  subtotal     Float              @default(0)
-  taxTotal     Float              @default(0)
-  total        Float              @default(0)
-  status       enum_Orders_status @default(created)
-  email        String?            @db.VarChar(255)
-  createdAt    DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime?          @db.Timestamptz(6)
-  tips         Float              @default(0)
-  OrderItems   OrderItem[]
+  id         Int                @id @default(autoincrement())
+  tableId    Int
+  subtotal   Float              @default(0)
+  taxTotal   Float              @default(0)
+  total      Float              @default(0)
+  status     enum_Orders_status @default(created)
+  email      String?            @db.VarChar(255)
+  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime?          @db.Timestamptz(6)
+  tips       Float              @default(0)
+  OrderItems OrderItem[]
 }
 
 model Tables {
@@ -66,6 +67,12 @@ model Users {
   role      enum_Users_role @default(viewer)
   createdAt DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt DateTime?       @db.Timestamptz(6)
+}
+
+model Categories {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+  menu Menu[]
 }
 
 enum enum_OrderItems_status {

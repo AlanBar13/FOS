@@ -1,14 +1,14 @@
-import { RawMenu } from "./Order"
+import { RawMenu } from "./Order";
 
 export interface Cart {
-    qty: number
-    item: RawMenu
-    total: number
+  qty: number;
+  item: RawMenu;
+  total: number;
 }
 
 export interface OrderedItems {
-    menuId: string
-    qty: number
-    name: string
-    total: number
+  menuId: string;
+  qty: number;
+  name: string;
+  total: number;
 }

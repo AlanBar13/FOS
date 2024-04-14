@@ -16,7 +16,10 @@
     "build:server": "cd ./server && npm run build",
     "build": "npm run build:client && npm run build:server",
     "start": "cd ./server && npm run start",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "db:validate": "cd ./server && dotenv -e ../.env.local -- npx prisma validate",
+    "db:migrate": "cd ./server && dotenv -e ../.env.local -- npx prisma migrate dev",
+    "db:generate": "cd ./server && npx prisma generate"
   },
   "keywords": [],
   "author": "Alan Bardales",

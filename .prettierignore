@@ -1,0 +1,8 @@
+# Ignores
+client/dist
+client/node_modules
+server/dist
+server/node_modules
+
+# Ignore all HTML files:
+**/*.html
