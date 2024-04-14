@@ -32,5 +32,5 @@ jobs:
             **/node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - run: npm install
-      - run: npm db:generate
+      - run: npm run db:generate
       - run: npm run build --if-present
