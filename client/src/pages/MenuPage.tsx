@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import lod from 'lodash';
 import { Cart } from '../models/Cart';
 import { RawMenu, RawOrderItem } from '../models/Order';
 import { FeedbackType } from '../models/SocketModels';
@@ -16,10 +17,10 @@ import {Box} from '@mui/material';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Typography from '@mui/material/Typography';
 
-import MenuItemComponent from '../components/MenuPage/MenuItemComponent';
 import AppLayout from '../components/Shared/AppLayout';
 import CartComponent from '../components/MenuPage/CartComponent';
 import DialogComponent from '../components/Shared/DialogComponent';
+import SectionsComponent from '../components/MenuPage/SectionsComponent';
 
 const drawerBleeding = 56;
 
@@ -43,7 +44,6 @@ export default function MenuPage(){
     const dispatch = useCurrentOrderDispatch();
     const query = useQuery();
     const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
-    const [menu, setMenu] = useState<RawMenu[]>([]);
     const [openCart, setOpenCart] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [tableId] = useState<string | null>(query.get("mesa"));
@@ -51,6 +51,8 @@ export default function MenuPage(){
     const [cart, setCart] = useState<Cart[]>([]);
     const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [grouped, setGrouped] = useState<lod.Dictionary<RawMenu[]> | null>();
 
     const events: SocketEvent[] = [
         {
@@ -109,7 +111,10 @@ export default function MenuPage(){
                 }
 
                 const menu = await api.menu.fetchMenu();
-                setMenu(menu);
+                const grouped = lod.groupBy(menu, "Category.name");
+                const categories = Object.keys(grouped);
+                setCategories(categories);
+                setGrouped(grouped);
             } catch (error) {
                 showAlert(`Error ${(error as Error).message}`, 'error')
             }
@@ -203,7 +208,9 @@ export default function MenuPage(){
             />
             {isLoading && <LinearProgress />}
             <Box sx={{marginTop: '0.5rem', marginLeft: '0.5rem', marginRight: '0.5rem', marginBottom: '4rem' }}>
-                {menu.map((item) => <MenuItemComponent key={item.id} item={item} onAddClicked={addToCart} />)}
+                {categories.map(category => (
+                    <SectionsComponent category={category} groupedItems={grouped!} addToCart={addToCart} />
+                ))}
             </Box>
             <SwipeableDrawer 
                 anchor='bottom' 

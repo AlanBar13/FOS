@@ -151,7 +151,6 @@ export default function AddItemComponent({ menu = null, edit, categories, onAddI
         }else {
             try {
                 const newItem = await api.menu.addMenuItem(item);
-                console.log(newItem)
                 onAddItem(newItem);
                 setItem(defaultItem);
                 setUploadText("");

@@ -19,6 +19,7 @@ import MenuDataComponent from './Menu/MenuDataComponent';
 import AdminAppBarComponent from './Shared/AdminAppBarComponent';
 import AddItemComponent from './Menu/AddItemComponent';
 import DialogComponent from '../Shared/DialogComponent';
+import CategoriesComponent from './Menu/CategoriesComponent';
 
 export default function MenuComponent(){
     const {showAlert} = useAlert();
@@ -121,6 +122,36 @@ export default function MenuComponent(){
         }
     }
 
+    const saveCategory = async (item: Category) => {
+        try {
+            if(item.name === ""){
+                showAlert('El numbre de la categoria no puede ser vacia', 'warning');
+                return;
+            }
+
+            await api.category.updateCategory(item.id!, item);
+            showAlert('Categoria editada correctamente', 'success');
+        } catch (error) {
+            showAlert('No se pudo editar la categoria', 'error');
+        }
+    }
+
+    const deleteCategory = async (id?: number) => {
+        try {
+            if(id == null){
+                showAlert('Id de categoria no puede ser vacia', 'warning');
+                return;
+            }
+
+            await api.category.deleteCategory(id);
+            const newCategories = categories.filter(cat => cat.id !== id);
+            setCategories(newCategories);
+            showAlert('Categoria eliminada correctamente', 'success');
+        } catch (error) {
+            showAlert('No se pudo editar la categoria', 'error');
+        }
+    }
+
     return(
         <>
             <AdminAppBarComponent title='Administracion de Menu' />
@@ -138,6 +169,7 @@ export default function MenuComponent(){
                         <br />
                         <Button fullWidth variant='outlined' onClick={addNewCategory}>Añadir</Button>
                     </FormGroup>
+                    <CategoriesComponent categories={categories} saveCategory={saveCategory} deleteCategory={deleteCategory} />
                 </AccordionDetails>
             </Accordion>
             <Accordion sx={{ marginBottom: '1rem'}}>

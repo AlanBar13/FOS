@@ -42,7 +42,7 @@ export default function MenuItemComponent({ item, onAddClicked }: MenuItemCompon
     }
 
     return (
-        <Card sx={{ display: 'flex', marginBottom: '1rem' }}>
+        <Card sx={{ display: 'flex', marginBottom: '0.5rem' }}>
             {item.img !== null ? (
                 <CardMedia
                     component="img"

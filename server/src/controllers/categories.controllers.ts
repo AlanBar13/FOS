@@ -16,7 +16,7 @@ export const createNewCategory = asyncHandler(async (req: Request, res: Response
 });
 
 export const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
-    const categories = await db.categories.findMany({});
+    const categories = await db.categories.findMany({orderBy: { id: "asc" }});
 
     res.json(categories);
 });
