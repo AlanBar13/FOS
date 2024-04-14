@@ -1,34 +1,34 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1E88E5',
-      contrastText: '#FFFFFF',
+      main: "#1E88E5",
+      contrastText: "#FFFFFF",
     },
     secondary: {
-      main: '#FFC107',
-      contrastText: '#212121',
+      main: "#FFC107",
+      contrastText: "#212121",
     },
     error: {
-      main: '#f44336',
+      main: "#f44336",
     },
     warning: {
-      main: '#FF9800',
+      main: "#FF9800",
     },
     success: {
-      main: '#4CAF50',
+      main: "#4CAF50",
     },
     info: {
-      main: '#00BCD4',
+      main: "#00BCD4",
     },
     background: {
-      default: '#FAFAFA',
-      paper: '#FFFFFF',
+      default: "#FAFAFA",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: "#212121",
+      secondary: "#757575",
     },
   },
   typography: {
@@ -39,7 +39,7 @@ const theme = createTheme({
     h2: {
       fontFamily: '"Poppins", sans-serif',
     },
-  }
+  },
 });
 
 export default theme;

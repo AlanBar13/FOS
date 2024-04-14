@@ -2,7 +2,7 @@ import http from "http";
 import express, { Express } from "express";
 import cors from "cors";
 import compression from "compression";
-import path from 'path';
+import path from "path";
 import { Server } from "socket.io";
 
 import admMenuRoutes from "./routes/admin/menu.routes";
@@ -13,36 +13,47 @@ import admDashboardRoutes from "./routes/admin/dashboard.routes";
 import admCategoriesRoutes from "./routes/admin/categories.routes";
 import tableRoutes from "./routes/public/table.routes";
 import orderRoutes from "./routes/public/order.routes";
-import menuRoutes from './routes/public/menu.routes';
+import menuRoutes from "./routes/public/menu.routes";
 import { authUser } from "./controllers/user.controller";
 
 import logger from "./utils/logger";
 import env from "./config/env";
 import { notFound, errorHandler } from "./middleware/errorMiddleware";
-import { onNewWebSocketConnection } from './services/socket.service';
-import { PaymentMethods } from './constants';
-import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData, CustomRequest } from './types';
+import { onNewWebSocketConnection } from "./services/socket.service";
+import { PaymentMethods } from "./constants";
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  InterServerEvents,
+  SocketData,
+  CustomRequest,
+} from "./types";
 import { protectRoutes } from "./middleware/authMiddleware";
 
 const app: Express = express();
 const httpServer = http.createServer(app);
 
 // Socket Logic
-export const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, { cors: {origin: "*"} });
+export const io = new Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>(httpServer, { cors: { origin: "*" } });
 
 io.on("connection", onNewWebSocketConnection);
 
 app.use(compression());
 app.use(cors());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use((req: CustomRequest, res, next) => {
-    req.io = io;
-    return next();
-})
+  req.io = io;
+  return next();
+});
 
 app.get("/v1/paymentMethods", (req, res) => {
-    res.json(PaymentMethods.paymentMethods);
+  res.json(PaymentMethods.paymentMethods);
 });
 
 // API routes
@@ -58,10 +69,10 @@ app.use("/v1/admin/dashboard", protectRoutes, admDashboardRoutes);
 app.use("/v1/admin/categories", protectRoutes, admCategoriesRoutes);
 
 // Serve web page
-app.use(express.static(path.join(__dirname, '../../client/dist')));
+app.use(express.static(path.join(__dirname, "../../client/dist")));
 
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, '../../client/dist/index.html'))
+  res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
 });
 
 // Middleware
@@ -71,7 +82,7 @@ app.use(errorHandler);
 const port = env.port;
 
 httpServer.listen(port, () => {
-    logger.info(`FOS API server running on port ${port}`);
-})
+  logger.info(`FOS API server running on port ${port}`);
+});
 
 export default app; //testing purposes
