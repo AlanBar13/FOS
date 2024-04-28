@@ -33,8 +33,29 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
     socket.emit("id", socket.id);
   });
 
-  socket.on("disconnect", () => {
+  socket.on("saveSubscription", async (orderId: number, subscription: string) => {
+    try {
+      // Subscribe to notifications
+      const webPushSubscription = await db.webPushSubscription.findFirst({ where: { socketId: socket.id }});
+      if (!webPushSubscription){
+        await db.webPushSubscription.create({ data: {
+          orderId: orderId,
+          socketId: socket.id,
+          subscription: subscription
+        }})
+      }
+    } catch (error) {
+      logger.info(`Subscription ${socket.id} not found`)
+    }
+  })
+
+  socket.on("disconnect", async () => {
     onlineClients.delete(socket.id);
+    try {
+      await db.webPushSubscription.delete({ where: { socketId: socket.id }})
+    } catch (error) {
+      logger.info(`Subscription ${socket.id} not found`)
+    }
     logger.info(`Socket ${socket.id} has disconnected`);
   });
 

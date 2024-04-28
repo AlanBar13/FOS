@@ -6,6 +6,7 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
   registerType: "prompt",
   includeAssets: ["FOS.ico"],
   srcDir: "src",
+  injectRegister: 'auto',
   filename: "service-worker.ts",
   strategies: "injectManifest",
   manifest: {
@@ -14,21 +15,29 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
     description: "Aplicacion para restaurantes para manejar pedidos",
     icons: [
       {
-        src: 'pwa-192x192.png', // <== don't add slash, for testing
-        sizes: '192x192',
-        type: 'image/png',
+        "src": "manifest-icon-192.maskable.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
       },
       {
-        src: '/pwa-512x512.png', // <== don't remove slash, for testing
-        sizes: '512x512',
-        type: 'image/png',
+        "src": "manifest-icon-192.maskable.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
       },
       {
-        src: 'pwa-512x512.png', // <== don't add slash, for testing
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'any maskable',
+        "src": "manifest-icon-512.maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
       },
+      {
+        "src": "manifest-icon-512.maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
     ],
     theme_color: "#ffffff",
     background_color: "#e8ebf2",

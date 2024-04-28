@@ -4,6 +4,7 @@ import { Cart } from "../models/Cart";
 import { RawMenu, RawOrderItem } from "../models/Order";
 import { FeedbackType } from "../models/SocketModels";
 import { useApi } from "../hooks/ApiProvider";
+import { useNotification } from "../hooks/NotificationProvider";
 import { useQuery } from "../hooks/useQuery";
 import { socket, SocketEvents } from "../utils/socketClient";
 import { useAlert } from "../hooks/useAlert";
@@ -41,6 +42,7 @@ const Puller = styled(Box)(({ theme }) => ({
 export default function MenuPage() {
   const { showAlert } = useAlert();
   const api = useApi();
+  const notification = useNotification();
   const dispatch = useCurrentOrderDispatch();
   const query = useQuery();
   const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
@@ -108,6 +110,11 @@ export default function MenuPage() {
               },
             });
           }
+
+          const subscription = await notification.getSubscription();
+          if(order.id > 0 && subscription) {
+            socket.emit("saveSubscription", order.id, JSON.stringify(subscription))
+          }
         }
 
         const menu = await api.menu.fetchMenu();
@@ -121,7 +128,24 @@ export default function MenuPage() {
       setIsLoading(false);
     };
 
+    const notificationWork = async () => {
+      try {
+        if (!notification.hasPermission()){
+          await notification.requestPermission();
+        }
+
+        if ((await notification.getSubscription()) === null){
+          const subscription = await notification.subscribe()
+          console.log("subs", subscription);
+        }
+
+      } catch (error) {
+        console.log("Error subscribing to push notifications", error);
+      }
+    }
+
     fetchData();
+    notificationWork();
   }, []);
 
   const addItemToCart = async (orderIdToUpdate: number) => {
@@ -181,6 +205,10 @@ export default function MenuPage() {
         const orderCreated = await api.table.createOrder(tableId);
         setOrderId(orderCreated.id);
         await addItemToCart(orderCreated.id);
+        const subscription = await notification.getSubscription();
+        if(subscription) {
+          socket.emit("saveSubscription", orderCreated.id, JSON.stringify(subscription))
+        }
       } catch (error) {
         showAlert(`Error ${error}`, "error");
       }
@@ -227,8 +255,9 @@ export default function MenuPage() {
           marginBottom: "4rem",
         }}
       >
-        {categories.map((category) => (
+        {categories.map((category, i) => (
           <SectionsComponent
+            key={i}
             category={category}
             groupedItems={grouped!}
             addToCart={addToCart}

@@ -5,6 +5,7 @@ import { AlertProvider } from "./hooks/useAlert";
 import { CurrentOrderProvider } from "./hooks/useCurrentOrder";
 import ApiProvider from "./hooks/ApiProvider";
 import AuthProvider from "./hooks/AuthProvider";
+import NotifactionProvider from "./hooks/NotificationProvider";
 import router from "./router";
 import theme from "./utils/theme";
 import "./App.css";
@@ -12,13 +13,15 @@ import "./App.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <AlertProvider>
-      <ApiProvider>
-        <CurrentOrderProvider>
-          <AuthProvider>
-            <RouterProvider router={router} />
-          </AuthProvider>
-        </CurrentOrderProvider>
-      </ApiProvider>
+      <NotifactionProvider>
+        <ApiProvider>
+          <CurrentOrderProvider>
+            <AuthProvider>
+              <RouterProvider router={router} />
+            </AuthProvider>
+          </CurrentOrderProvider>
+        </ApiProvider>
+      </NotifactionProvider>
     </AlertProvider>
   </ThemeProvider>,
 );

@@ -1,6 +1,7 @@
 import { OrderItem } from "@prisma/client";
 import { Request } from "express";
 import { Server } from "socket.io";
+import { Urgency } from 'web-push'
 
 export interface QueryFilters {
   id?: string;
@@ -99,4 +100,15 @@ export interface NeedWaiterRequest {
   tableId: number;
   orderId: number;
   message: string;
+}
+
+export interface NotificationPayload {
+  title: string
+  body: string
+  icon?: string
+}
+
+export interface ConfigOptions {
+  topic: string
+  urgency: Urgency
 }

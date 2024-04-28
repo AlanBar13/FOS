@@ -17,4 +17,8 @@ export default {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
   },
+  webPush: {
+    publicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+    privateKey: process.env.VAPID_PRIVATE_KEY ?? ""
+  }
 };

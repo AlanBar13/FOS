@@ -38,17 +38,18 @@ model OrderItem {
 }
 
 model Order {
-  id         Int                @id @default(autoincrement())
-  tableId    Int
-  subtotal   Float              @default(0)
-  taxTotal   Float              @default(0)
-  total      Float              @default(0)
-  status     enum_Orders_status @default(created)
-  email      String?            @db.VarChar(255)
-  createdAt  DateTime           @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime?          @db.Timestamptz(6)
-  tips       Float              @default(0)
-  OrderItems OrderItem[]
+  id            Int                   @id @default(autoincrement())
+  tableId       Int
+  subtotal      Float                 @default(0)
+  taxTotal      Float                 @default(0)
+  total         Float                 @default(0)
+  status        enum_Orders_status    @default(created)
+  email         String?               @db.VarChar(255)
+  createdAt     DateTime              @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime?             @db.Timestamptz(6)
+  tips          Float                 @default(0)
+  OrderItems    OrderItem[]
+  Subscriptions WebPushSubscription[]
 }
 
 model Tables {
@@ -73,6 +74,13 @@ model Categories {
   id   Int    @id @default(autoincrement())
   name String @db.VarChar(255)
   menu Menu[]
+}
+
+model WebPushSubscription {
+  socketId     String @unique
+  orderId      Int
+  subscription String
+  Order        Order  @relation(fields: [orderId], references: [id])
 }
 
 enum enum_OrderItems_status {
