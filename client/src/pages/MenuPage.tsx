@@ -20,7 +20,7 @@ import Typography from "@mui/material/Typography";
 import AppLayout from "../components/Shared/AppLayout";
 import CartComponent from "../components/MenuPage/CartComponent";
 import DialogComponent from "../components/Shared/DialogComponent";
-import SectionsComponent from "../components/MenuPage/SectionsComponent";
+import TabsComponent from "../components/MenuPage/TabsComponent";
 
 const drawerBleeding = 56;
 
@@ -111,8 +111,11 @@ export default function MenuPage() {
         }
 
         const menu = await api.menu.fetchMenu();
+        const categoriesRaw = await api.category.fetchCategories();
         const grouped = lod.groupBy(menu, "Category.name");
-        const categories = Object.keys(grouped);
+        const categories = lod.map(categoriesRaw, (el) => {
+          return el.name
+        })
         setCategories(categories);
         setGrouped(grouped);
       } catch (error) {
@@ -221,19 +224,10 @@ export default function MenuPage() {
       {isLoading && <LinearProgress />}
       <Box
         sx={{
-          marginTop: "0.5rem",
-          marginLeft: "0.5rem",
-          marginRight: "0.5rem",
           marginBottom: "4rem",
         }}
       >
-        {categories.map((category) => (
-          <SectionsComponent
-            category={category}
-            groupedItems={grouped!}
-            addToCart={addToCart}
-          />
-        ))}
+        <TabsComponent categories={categories} groupedItems={grouped!} addToCart={addToCart} />
       </Box>
       <SwipeableDrawer
         anchor="bottom"
@@ -253,7 +247,8 @@ export default function MenuPage() {
             visibility: "visible",
             right: 0,
             left: 0,
-            background: "#FFC107",
+            background: "#ffff",
+            boxShadow: "0px -4px 3px rgba(50, 50, 50, 0.10)"
           }}
         >
           <Puller />

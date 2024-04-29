@@ -19,7 +19,7 @@ export default function AppBarComponent({
   toggleCart,
 }: AppBarComponentProps) {
   return (
-    <AppBar position="sticky" style={{ background: "#2E3B55" }}>
+    <AppBar position="sticky" style={{ background: "#ffff" }}>
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
@@ -33,7 +33,7 @@ export default function AppBarComponent({
               display: { xs: "none", md: "flex" },
               fontWeight: 700,
               letterSpacing: ".1rem",
-              color: "inherit",
+              color: "black",
               textDecoration: "none",
             }}
           >
@@ -49,7 +49,7 @@ export default function AppBarComponent({
               flexGrow: 1,
               fontWeight: 700,
               letterSpacing: ".1rem",
-              color: "inherit",
+              color: "black",
               textDecoration: "none",
             }}
           >
@@ -61,7 +61,7 @@ export default function AppBarComponent({
               <Tooltip title="Abrir carrito">
                 <IconButton
                   sx={{ p: 0 }}
-                  color="secondary"
+                  color="primary"
                   onClick={toggleCart}
                 >
                   <ShoppingCartIcon />
