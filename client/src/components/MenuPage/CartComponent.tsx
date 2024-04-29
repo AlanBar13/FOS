@@ -6,7 +6,6 @@ import { useCurrentOrder } from "../../hooks/useCurrentOrder";
 
 import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -43,19 +42,6 @@ export default function CartComponent({
     return total;
   }, [cart, currentOrder.orderedItems]);
 
-  const getOrderColor = (status: string): string => {
-    switch (status) {
-      case "ordered":
-        return "red";
-      case "inProgress":
-        return "yellow";
-      case "done":
-        return "green";
-      default:
-        return "white";
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -72,43 +58,37 @@ export default function CartComponent({
           justifyContent: "space-between",
         }}
       >
-        <Box sx={{ overflow: "auto" }}>
-          <Typography variant="h6">Carrito</Typography>
-          {cart.map((crt, index) => (
-            <Box key={index} sx={{ display: "flex", flexDirection: "row" }}>
-              <IconButton onClick={() => deleteFromCart(index)}>X</IconButton>
-              <Typography sx={{ paddingTop: "0.55rem" }} fontSize={13}>
-                {crt.qty}x - {crt.item.name} - {formatPriceFixed(crt.total)}
+        {cart.length > 0 ? (
+          <>
+            <Box sx={{ overflow: "auto" }}>
+              <Typography variant="h6">Carrito</Typography>
+              {cart.map((crt, index) => (
+                <Box key={index} sx={{ display: "flex", flexDirection: "row" }} onClick={() => deleteFromCart(index)}>
+                  <Typography sx={{ paddingTop: "0.55rem" }} fontSize={13}>
+                    {crt.qty}x - {crt.item.name} - {formatPriceFixed(crt.total)}
+                  </Typography>
+                </Box>
+              ))}
+              <Typography sx={{ paddingTop: "0.5rem" }} component="div">
+                <strong>SubTotal: {formatPriceFixed(cartTotal)}</strong>
               </Typography>
+              <Button
+                variant="contained"
+                disabled={cart.length === 0}
+                onClick={onOrder}
+              >
+                Ordenar
+              </Button>
             </Box>
-          ))}
-          <Typography sx={{ paddingTop: "0.5rem" }} component="div">
-            <strong>SubTotal: {formatPriceFixed(cartTotal)}</strong>
-          </Typography>
-          <Button
-            variant="contained"
-            disabled={cart.length === 0}
-            onClick={onOrder}
-          >
-            Ordenar
-          </Button>
-        </Box>
-        <Divider orientation="vertical" flexItem />
-        {currentOrder.orderedItems.length > 0 && (
+            <Divider orientation="vertical" flexItem />
+          </>
+        ) : null}
+        {currentOrder.orderedItems.length > 0 ? (
           <Box sx={{ overflow: "auto" }}>
             <Divider />
             <Typography variant="h6">Resumen Orden</Typography>
             {currentOrder.orderedItems.map((item, index) => (
               <Box key={index} sx={{ display: "flex", flexDirection: "row" }}>
-                <Box
-                  sx={{
-                    backgroundColor: getOrderColor(item.status),
-                    borderRadius: 0.5,
-                    color: getOrderColor(item.status),
-                  }}
-                >
-                  |
-                </Box>
                 <Typography sx={{ paddingTop: "0.55rem" }} fontSize={13}>
                   {item.qty}x - {item.Menu.name} -{" "}
                   {formatPriceFixed(item.Menu.price * item.qty)}
@@ -116,6 +96,10 @@ export default function CartComponent({
               </Box>
             ))}
           </Box>
+        ): (
+          <Typography>
+            No hay nada en tu cuenta, agrega algo para iniciar
+          </Typography>
         )}
       </Box>
       <Box>

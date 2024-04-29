@@ -58,16 +58,33 @@ export default function MenuItemComponent({
       )}
       <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
         <CardContent sx={{ flex: "1 0 auto" }}>
-          <Typography component="div" variant="h5">
-            {item.name}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            component="div"
-          >
-            {item.description}
-          </Typography>
+          {item.img !== null ? (
+            <>
+              <Typography component="div" variant="h6">
+                {item.name}
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                component="div"
+              >
+                {item.description}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography component="div" variant="h5">
+                {item.name}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                color="text.secondary"
+                component="div"
+              >
+                {item.description}
+              </Typography>
+            </>
+          )}
         </CardContent>
 
         <Box
