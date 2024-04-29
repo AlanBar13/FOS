@@ -14,6 +14,7 @@ import admCategoriesRoutes from "./routes/admin/categories.routes";
 import tableRoutes from "./routes/public/table.routes";
 import orderRoutes from "./routes/public/order.routes";
 import menuRoutes from "./routes/public/menu.routes";
+import categoriesRoutes from "./routes/public/categories.routes";
 import { authUser } from "./controllers/user.controller";
 
 import logger from "./utils/logger";
@@ -60,6 +61,7 @@ app.get("/v1/paymentMethods", (req, res) => {
 app.use("/v1/table", tableRoutes);
 app.use("/v1/order", orderRoutes);
 app.use("/v1/menu", menuRoutes);
+app.use("/v1/categories", categoriesRoutes);
 app.post("/v1/login", authUser);
 app.use("/v1/admin/menu", protectRoutes, admMenuRoutes);
 app.use("/v1/admin/order", protectRoutes, admOrderRoutes);

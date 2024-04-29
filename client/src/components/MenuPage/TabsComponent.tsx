@@ -55,10 +55,10 @@ export default function TabsComponent({ categories, groupedItems, addToCart }: T
     return(
         <>
             <Tabs sx={{ marginBottom: '0.5rem' }} value={value} onChange={handleChange} variant="fullWidth" aria-label="category-tabs">
-                {categories.map((category, index) => <Tab label={category} {...a11yProps(index)} />)}
+                {categories.map((category, index) => <Tab key={index} label={category} {...a11yProps(index)} />)}
             </Tabs>
             {categories.map((category, index)=> (
-                <CustomTabPanel value={value} index={index}>
+                <CustomTabPanel key={index} value={value} index={index}>
                     {groupedItems[category].map(item => <MenuItemComponent key={item.id} item={item} onAddClicked={addToCart} />)}
                 </CustomTabPanel>
             ))}

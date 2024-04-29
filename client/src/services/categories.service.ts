@@ -10,7 +10,7 @@ export class CategoryService {
 
   async fetchCategories(): Promise<Category[]> {
     const response =
-      await this._apiService.get<Category[]>(`/admin/categories`);
+      await this._apiService.get<Category[]>(`/categories`);
     return response.data;
   }
 
