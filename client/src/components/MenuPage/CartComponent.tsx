@@ -15,7 +15,7 @@ interface CartComponentProps {
   isLoading: boolean;
   deleteFromCart: (index: number) => void;
   onOrder: () => void;
-  onOpenModal: (total: number) => void
+  onOpenModal: (total: number) => void;
 }
 
 export default function CartComponent({
@@ -23,7 +23,7 @@ export default function CartComponent({
   isLoading = false,
   deleteFromCart,
   onOrder,
-  onOpenModal
+  onOpenModal,
 }: CartComponentProps) {
   const currentOrder = useCurrentOrder();
   const cartTotal = useMemo(() => _.sumBy(cart, "total"), [cart]);
@@ -65,7 +65,11 @@ export default function CartComponent({
             <Box sx={{ overflow: "auto" }}>
               <Typography variant="h6">Carrito</Typography>
               {cart.map((crt, index) => (
-                <Box key={index} sx={{ display: "flex", flexDirection: "row" }} onClick={() => deleteFromCart(index)}>
+                <Box
+                  key={index}
+                  sx={{ display: "flex", flexDirection: "row" }}
+                  onClick={() => deleteFromCart(index)}
+                >
                   <Typography sx={{ paddingTop: "0.55rem" }} fontSize={13}>
                     {crt.qty}x - {crt.item.name} - {formatPriceFixed(crt.total)}
                   </Typography>
@@ -97,7 +101,7 @@ export default function CartComponent({
               </Box>
             ))}
           </Box>
-        ): (
+        ) : (
           <Typography>
             No hay nada en tu cuenta, agrega algo para iniciar
           </Typography>
@@ -113,7 +117,10 @@ export default function CartComponent({
             justifyContent: "space-between",
           }}
         >
-          <Button disabled={currentOrder.orderedItems.length === 0} onClick={() => onOpenModal(orderTotal)}>
+          <Button
+            disabled={currentOrder.orderedItems.length === 0}
+            onClick={() => onOpenModal(orderTotal)}
+          >
             Pagar
           </Button>
           <Typography sx={{ paddingTop: "0.5rem" }} component="div">

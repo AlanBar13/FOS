@@ -59,11 +59,7 @@ export default function AppBarComponent({
           {!hideCart ? (
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Abrir carrito">
-                <IconButton
-                  sx={{ p: 0 }}
-                  color="primary"
-                  onClick={toggleCart}
-                >
+                <IconButton sx={{ p: 0 }} color="primary" onClick={toggleCart}>
                   <ShoppingCartIcon />
                 </IconButton>
               </Tooltip>

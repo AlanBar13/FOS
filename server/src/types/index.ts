@@ -96,7 +96,7 @@ export interface MostOrderedQueryResult {
 }
 
 export interface NeedWaiterRequest {
-  id: string
+  id: string;
   tableId: number;
   orderId: number;
   message: string;

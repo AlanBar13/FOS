@@ -45,11 +45,10 @@ export default function DashboardComponent() {
     {
       name: SocketEvents.needWaiter,
       handler(request: NeedWaiterRequest) {
-        console.log("waiter request", request)
         setNotifications((prev) => {
           const newList = [request, ...prev];
           return newList;
-        })
+        });
       },
     },
   ];
@@ -130,7 +129,10 @@ export default function DashboardComponent() {
           <ImageList cols={5}>
             {notifications.map((notification, i) => (
               <ImageListItem key={i}>
-                <WaiterNeededComponent request={notification} seen={seenClicked} />
+                <WaiterNeededComponent
+                  request={notification}
+                  seen={seenClicked}
+                />
               </ImageListItem>
             ))}
           </ImageList>

@@ -120,8 +120,8 @@ export default function MenuPage() {
         const categoriesRaw = await api.category.fetchCategories();
         const grouped = lod.groupBy(menu, "Category.name");
         const categories = lod.map(categoriesRaw, (el) => {
-          return el.name
-        })
+          return el.name;
+        });
         setCategories(categories);
         setGrouped(grouped);
       } catch (error) {
@@ -222,11 +222,14 @@ export default function MenuPage() {
   const completePayment = async () => {
     socket.emit("sendPaymentRequest", orderId, Number(tableId), method, email);
     setOpenPaymentModal(false);
-    showAlert("Gracias por tu preferencia, esta orden sera cerrada en 5 segundos", "info");
-    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+    showAlert(
+      "Gracias por tu preferencia, esta orden sera cerrada en 5 segundos",
+      "info",
+    );
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
     await delay(5000);
     window.location.reload();
-  }
+  };
 
   return (
     <AppLayout
@@ -247,7 +250,11 @@ export default function MenuPage() {
           marginBottom: "4rem",
         }}
       >
-        <TabsComponent categories={categories} groupedItems={grouped!} addToCart={addToCart} />
+        <TabsComponent
+          categories={categories}
+          groupedItems={grouped!}
+          addToCart={addToCart}
+        />
       </Box>
       <SwipeableDrawer
         anchor="bottom"
@@ -268,7 +275,7 @@ export default function MenuPage() {
             right: 0,
             left: 0,
             background: "#ffff",
-            boxShadow: "0px -4px 3px rgba(50, 50, 50, 0.10)"
+            boxShadow: "0px -4px 3px rgba(50, 50, 50, 0.10)",
           }}
         >
           <Puller />
@@ -313,8 +320,18 @@ export default function MenuPage() {
           si tienes duda pregunta al mesero.
         </Typography>
       </DialogComponent>
-      <DialogComponent title={`Monto a pagar ${formatPriceFixed(total)}`} isOpen={openPaymentModal} onCancel={() => setOpenPaymentModal(false)} onConfirm={completePayment}>
-        <PaymentComponent method={method} setMethod={setMethod} email={email} setEmail={setEmail} />
+      <DialogComponent
+        title={`Monto a pagar ${formatPriceFixed(total)}`}
+        isOpen={openPaymentModal}
+        onCancel={() => setOpenPaymentModal(false)}
+        onConfirm={completePayment}
+      >
+        <PaymentComponent
+          method={method}
+          setMethod={setMethod}
+          email={email}
+          setEmail={setEmail}
+        />
       </DialogComponent>
     </AppLayout>
   );
