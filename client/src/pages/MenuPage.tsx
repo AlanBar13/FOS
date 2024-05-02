@@ -9,6 +9,7 @@ import { socket, SocketEvents } from "../utils/socketClient";
 import { useAlert } from "../hooks/useAlert";
 import { useCurrentOrderDispatch } from "../hooks/useCurrentOrder";
 import { SocketEvent, useSocketEvents } from "../hooks/useSocketEvents";
+import { formatPriceFixed } from "../utils/numbers";
 
 import { Global } from "@emotion/react";
 import { styled } from "@mui/material/styles";
@@ -21,6 +22,7 @@ import AppLayout from "../components/Shared/AppLayout";
 import CartComponent from "../components/MenuPage/CartComponent";
 import DialogComponent from "../components/Shared/DialogComponent";
 import TabsComponent from "../components/MenuPage/TabsComponent";
+import PaymentComponent from "../components/MenuPage/PaymentComponent";
 
 const drawerBleeding = 56;
 
@@ -51,8 +53,12 @@ export default function MenuPage() {
   const [cart, setCart] = useState<Cart[]>([]);
   const [cartIsLoading, setCartIsLoading] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openPaymentModal, setOpenPaymentModal] = useState<boolean>(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [grouped, setGrouped] = useState<lod.Dictionary<RawMenu[]> | null>();
+  const [total, setTotal] = useState<number>(0);
+  const [method, setMethod] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
 
   const events: SocketEvent[] = [
     {
@@ -114,8 +120,8 @@ export default function MenuPage() {
         const categoriesRaw = await api.category.fetchCategories();
         const grouped = lod.groupBy(menu, "Category.name");
         const categories = lod.map(categoriesRaw, (el) => {
-          return el.name
-        })
+          return el.name;
+        });
         setCategories(categories);
         setGrouped(grouped);
       } catch (error) {
@@ -208,6 +214,23 @@ export default function MenuPage() {
     setOpenModal(true);
   };
 
+  const onOpenPaymentModal = (total: number) => {
+    setTotal(total);
+    setOpenPaymentModal(true);
+  };
+
+  const completePayment = async () => {
+    socket.emit("sendPaymentRequest", orderId, Number(tableId), method, email);
+    setOpenPaymentModal(false);
+    showAlert(
+      "Gracias por tu preferencia, esta orden sera cerrada en 5 segundos",
+      "info",
+    );
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    await delay(5000);
+    window.location.reload();
+  };
+
   return (
     <AppLayout
       companyName={`${companyName} | Menu`}
@@ -227,7 +250,11 @@ export default function MenuPage() {
           marginBottom: "4rem",
         }}
       >
-        <TabsComponent categories={categories} groupedItems={grouped!} addToCart={addToCart} />
+        <TabsComponent
+          categories={categories}
+          groupedItems={grouped!}
+          addToCart={addToCart}
+        />
       </Box>
       <SwipeableDrawer
         anchor="bottom"
@@ -248,7 +275,7 @@ export default function MenuPage() {
             right: 0,
             left: 0,
             background: "#ffff",
-            boxShadow: "0px -4px 3px rgba(50, 50, 50, 0.10)"
+            boxShadow: "0px -4px 3px rgba(50, 50, 50, 0.10)",
           }}
         >
           <Puller />
@@ -278,6 +305,7 @@ export default function MenuPage() {
             isLoading={cartIsLoading}
             deleteFromCart={deleteFromCart}
             onOrder={onOpenModal}
+            onOpenModal={onOpenPaymentModal}
           />
         </StyledBox>
       </SwipeableDrawer>
@@ -291,6 +319,19 @@ export default function MenuPage() {
           Una vez agregados los productos no se podra hacer cambios a la orden,
           si tienes duda pregunta al mesero.
         </Typography>
+      </DialogComponent>
+      <DialogComponent
+        title={`Monto a pagar ${formatPriceFixed(total)}`}
+        isOpen={openPaymentModal}
+        onCancel={() => setOpenPaymentModal(false)}
+        onConfirm={completePayment}
+      >
+        <PaymentComponent
+          method={method}
+          setMethod={setMethod}
+          email={email}
+          setEmail={setEmail}
+        />
       </DialogComponent>
     </AppLayout>
   );

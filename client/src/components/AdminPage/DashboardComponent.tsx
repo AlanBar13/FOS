@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSocketEvents, SocketEvent } from "../../hooks/useSocketEvents";
-import { DashboardItems } from "../../models/SocketModels";
+import { DashboardItems, NeedWaiterRequest } from "../../models/SocketModels";
 import { SocketEvents } from "../../utils/socketClient";
 import { useAlert } from "../../hooks/useAlert";
 import { useApi } from "../../hooks/ApiProvider";
@@ -13,11 +13,13 @@ import ImageListItem from "@mui/material/ImageListItem";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
+import WaiterNeededComponent from "./Dashboard/WaiterNeededComponent";
 
 export default function DashboardComponent() {
   const api = useApi();
   const [pendingOrders, setPendingOrders] = useState<DashboardItems[]>([]);
   const [preparingOrders, setPreparingOrders] = useState<DashboardItems[]>([]);
+  const [notifications, setNotifications] = useState<NeedWaiterRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const { showAlert } = useAlert();
 
@@ -36,6 +38,15 @@ export default function DashboardComponent() {
       handler(updatedOrder: DashboardItems) {
         setPreparingOrders((prevPreparingOrders) => {
           const newList = [updatedOrder, ...prevPreparingOrders];
+          return newList;
+        });
+      },
+    },
+    {
+      name: SocketEvents.needWaiter,
+      handler(request: NeedWaiterRequest) {
+        setNotifications((prev) => {
+          const newList = [request, ...prev];
           return newList;
         });
       },
@@ -71,6 +82,11 @@ export default function DashboardComponent() {
     setPreparingOrders(updatedList);
   };
 
+  const seenClicked = (id: string) => {
+    const updatedList = notifications.filter((o) => o.id !== id);
+    setNotifications(updatedList);
+  };
+
   return (
     <>
       <AdminAppBarComponent title="Dashboard" />
@@ -102,6 +118,20 @@ export default function DashboardComponent() {
                   order={order}
                   onReadyClicked={readyClicked}
                   ready
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+          <Divider />
+          <Typography variant="h4">
+            Notificaciones ({notifications.length})
+          </Typography>
+          <ImageList cols={5}>
+            {notifications.map((notification, i) => (
+              <ImageListItem key={i}>
+                <WaiterNeededComponent
+                  request={notification}
+                  seen={seenClicked}
                 />
               </ImageListItem>
             ))}

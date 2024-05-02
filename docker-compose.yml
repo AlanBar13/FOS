@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   web:
@@ -6,7 +6,7 @@ services:
     image: fos:latest
     command: npm run start
     ports:
-      - '5000:5000'
+      - "5000:5000"
     volumes:
       - ./web:/app
     env_file:
