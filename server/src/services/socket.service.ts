@@ -206,7 +206,6 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
       orderId: number,
       tableId: number,
       payment_method: string,
-      total: string,
       email: string,
     ) => {
       try {
@@ -222,9 +221,10 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
         });
 
         const request: NeedWaiterRequest = {
+          id: uuidv4(),
           orderId: order.id,
           tableId: order.tableId,
-          message: `PAGO por ${PaymentMethods.getSpanishValue(payment_method)} ${payment_method === PaymentMethods.CARD ? "(Llevar terminal)" : ""} TOTAL: ${order.total}`,
+          message: `PAGO por ${PaymentMethods.getSpanishValue(payment_method)}${payment_method === PaymentMethods.CARD ? "(Llevar terminal)" : ""} TOTAL: ${order.total}`,
         };
         io.emit("needWaiter", request);
       } catch (error) {

@@ -18,6 +18,7 @@ export interface DashboardItems {
 }
 
 export interface NeedWaiterRequest {
+  id: string
   tableId: number;
   orderId: number;
   message: string;

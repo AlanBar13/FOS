@@ -54,7 +54,7 @@ export default function TabsComponent({ categories, groupedItems, addToCart }: T
 
     return(
         <>
-            <Tabs sx={{ marginBottom: '0.5rem' }} value={value} onChange={handleChange} variant="fullWidth" aria-label="category-tabs">
+            <Tabs sx={{ marginBottom: '0.5rem' }} value={value} onChange={handleChange} variant="scrollable" aria-label="category-tabs">
                 {categories.map((category, index) => <Tab key={index} label={category} {...a11yProps(index)} />)}
             </Tabs>
             {categories.map((category, index)=> (
