@@ -67,7 +67,6 @@ export default function MenuPage() {
         if (orderId > 0) {
           setOrderId(orderId);
         }
-
         switch (type) {
           case "itemAdded":
             dispatch({
@@ -77,11 +76,13 @@ export default function MenuPage() {
               },
             });
             break;
-          case "itemKitchen":
-            console.log(items, type, orderId);
-            break;
           default:
-            console.log(items, type, orderId);
+            dispatch({
+              type: "updateItems",
+              payload: {
+                orderItems: items,
+              },
+            });
             break;
         }
       },
@@ -108,7 +109,7 @@ export default function MenuPage() {
           setOrderId(order.id);
           if (order.OrderItems) {
             dispatch({
-              type: "addItems",
+              type: "replaceItems",
               payload: {
                 orderItems: order.OrderItems,
               },
