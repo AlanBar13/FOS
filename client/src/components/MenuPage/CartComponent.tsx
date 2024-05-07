@@ -96,7 +96,9 @@ export default function CartComponent({
               <Box key={index} sx={{ display: "flex", flexDirection: "row" }}>
                 <Typography sx={{ paddingTop: "0.55rem" }} fontSize={13}>
                   {item.qty}x - {item.Menu.name} -{" "}
-                  {formatPriceFixed(item.Menu.price * item.qty)}
+                  {formatPriceFixed(item.Menu.price * item.qty)}{" "}
+                  {item.status === "done" ? "- (Listo)" : null}
+                  {item.status === "inProgress" ? "- (En Preparacion)" : null}
                 </Typography>
               </Box>
             ))}

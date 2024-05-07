@@ -1,5 +1,6 @@
 import { Reducer } from "react";
 import { RawOrderItem } from "../models/Order";
+import _ from "lodash";
 
 type CurrentOrderPayload = {
   orderItems: RawOrderItem[];
@@ -10,7 +11,7 @@ export type CurrentOrderState = {
 };
 
 export type CurrentOrderDispatchType = {
-  type: "addItems" | "deleteItem";
+  type: "addItems" | "deleteItem" | "replaceItems" | "updateItems";
   payload: CurrentOrderPayload;
 };
 
@@ -23,8 +24,18 @@ export const currentOrderDispatcher: Reducer<
 ): CurrentOrderState => {
   switch (action.type) {
     case "addItems": {
-      console.log(action.payload);
       const orderItems = [...state.orderedItems, ...action.payload.orderItems];
+      return { ...state, orderedItems: orderItems };
+    }
+    case "replaceItems": {
+      return { ...state, orderedItems: action.payload.orderItems };
+    }
+    case "updateItems": {
+      const orderItems = updateAndReplace(
+        state.orderedItems,
+        action.payload.orderItems,
+      );
+      console.log(orderItems);
       return { ...state, orderedItems: orderItems };
     }
     case "deleteItem": {
@@ -34,4 +45,16 @@ export const currentOrderDispatcher: Reducer<
       throw Error("Unknown action: " + action.type);
     }
   }
+};
+
+const updateAndReplace = (
+  current: RawOrderItem[],
+  newValues: RawOrderItem[],
+): RawOrderItem[] => {
+  let newItems = current.map((item) => {
+    const item2 = _.find(newValues, { id: item.id });
+    return item2 ? { ...item, ...item2 } : item;
+  });
+
+  return newItems;
 };

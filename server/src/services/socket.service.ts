@@ -109,6 +109,27 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
         throw new Error(`No items sent`);
       }
 
+      const currentOrder = await db.order.findUnique({
+        where: { id: dashboardItem.orderId },
+      });
+
+      if (currentOrder === null) {
+        throw new Error(`Order does not exist`);
+      }
+
+      if (currentOrder.tableId !== dashboardItem.tableId) {
+        throw new Error(`Order does not belong to Table`);
+      }
+
+      if (
+        currentOrder.status === OrderStatus.deleted ||
+        currentOrder.status === OrderStatus.notPaid ||
+        currentOrder.status === OrderStatus.paid ||
+        currentOrder.status === OrderStatus.userClosed
+      ) {
+        throw new Error(`Order closed`);
+      }
+
       await db.order.update({
         where: {
           id: dashboardItem.orderId,
@@ -163,6 +184,28 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
       if (!dashboardItem.items || dashboardItem.items.length === 0) {
         throw new Error(`No items sent`);
       }
+
+      const currentOrder = await db.order.findUnique({
+        where: { id: dashboardItem.orderId },
+      });
+
+      if (currentOrder === null) {
+        throw new Error(`Order does not exist`);
+      }
+
+      if (currentOrder.tableId !== dashboardItem.tableId) {
+        throw new Error(`Order does not belong to Table`);
+      }
+
+      if (
+        currentOrder.status === OrderStatus.deleted ||
+        currentOrder.status === OrderStatus.notPaid ||
+        currentOrder.status === OrderStatus.paid ||
+        currentOrder.status === OrderStatus.userClosed
+      ) {
+        throw new Error(`Order closed`);
+      }
+
       await db.order.update({
         where: {
           id: dashboardItem.orderId,
@@ -173,9 +216,10 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
         },
       });
 
+      let orderItems: OrderItemWithMenu[] = [];
       await Promise.all(
         dashboardItem.items.map(async (item) => {
-          await db.orderItem.update({
+          const orderItem = await db.orderItem.update({
             where: {
               id: item.orderItemId,
             },
@@ -183,7 +227,11 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
               status: "done",
               doneAt: new Date(),
             },
+            include: {
+              Menu: true,
+            },
           });
+          orderItems.push(orderItem);
         }),
       );
 
@@ -195,6 +243,12 @@ export const onNewWebSocketConnection = async (socket: Socket) => {
       }));
       dashboardItem.items = updatedItems;
       io.emit("orderReadyServer", dashboardItem);
+      io.to(`table:${dashboardItem.tableId}`).emit(
+        "sendClientFeedback",
+        orderItems,
+        "itemReady",
+        dashboardItem.orderId,
+      );
     } catch (error) {
       logger.error(`[Socket] ${error}`);
     }
