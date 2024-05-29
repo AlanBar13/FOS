@@ -16,6 +16,7 @@ import TableRestaurantIcon from "@mui/icons-material/TableRestaurant";
 import GroupIcon from "@mui/icons-material/Group";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
+import DrawerItem from "./DrawerItem";
 
 interface AdminDrawerProps {
   drawerWidth: number;
@@ -26,21 +27,25 @@ const pages = [
     title: "Dashboard",
     route: "/admin/dashboard",
     icon: <DashboardIcon />,
+    for: []
   },
   {
     title: "Menu",
     route: "/admin/menu",
     icon: <RestaurantIcon />,
+    for: ["admin", "dev"]
   },
   {
     title: "Ordenes",
     route: "/admin/orders",
     icon: <BorderColorIcon />,
+    for: ["admin", "dev"]
   },
   {
     title: "Mesas",
     route: "/admin/tables",
     icon: <TableRestaurantIcon />,
+    for: []
   },
 ];
 
@@ -68,55 +73,19 @@ export default function AdminDrawer({ drawerWidth = 240 }: AdminDrawerProps) {
       </IconButton>
       <Divider />
       <List>
-        {pages.map((page) => (
-          <Tooltip key={page.title} title={page.title} placement="right">
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: "center",
-                  px: 2.5,
-                }}
-                onClick={() => navigateToRoute(page.route)}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {page.icon}
-                </ListItemIcon>
-              </ListItemButton>
-            </ListItem>
-          </Tooltip>
-        ))}
+        {pages.map((page) =>{
+          if (page.for.length === 0 || page.for.includes(auth.role)) {
+            return <DrawerItem key={page.title} title={page.title} route={page.route} icon={page.icon} navigateTo={navigateToRoute} />
+          }else{
+            return null;
+          }
+        })}
       </List>
       <Divider />
       <List>
-        <Tooltip title="Usuarios" placement="right">
-          <ListItem disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: "center",
-                px: 2.5,
-              }}
-              onClick={() => navigateToRoute("/admin/users")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: "auto",
-                  justifyContent: "center",
-                }}
-              >
-                <GroupIcon />
-              </ListItemIcon>
-            </ListItemButton>
-          </ListItem>
-        </Tooltip>
+        {auth.role === "admin" || auth.role === "dev" ? (
+          <DrawerItem title="Usuarios" route="/admin/users" icon={<GroupIcon />} navigateTo={navigateToRoute} />
+        ) : null}
         <Tooltip title="Cerrar Sesion" placement="right">
           <ListItem disablePadding sx={{ display: "block" }}>
             <ListItemButton
