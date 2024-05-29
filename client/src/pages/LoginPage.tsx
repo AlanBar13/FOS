@@ -46,7 +46,7 @@ export default function LoginPage() {
       const password = data.get("password");
       if (username && password) {
         await auth.loginAction(username.toString(), password.toString());
-        return navigate(`/admin`, { replace: true });
+        return navigate(`/admin/dashboard`, { replace: true });
       } else {
         showAlert("Usuario o Contraseña vacios", "warning");
       }

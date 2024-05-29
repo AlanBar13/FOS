@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 import { User } from "../../models/Users";
 import { useAlert } from "../../hooks/useAlert";
 import { useApi } from "../../hooks/ApiProvider";
+import { useAuth } from "../../hooks/AuthProvider";
 
 import AdminAppBarComponent from "./Shared/AdminAppBarComponent";
 import UserTableComponent from "./Users/UserTableComponent";
@@ -14,8 +16,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import DialogComponent from "../Shared/DialogComponent";
 
 export default function UsersComponent() {
+  const navigate = useNavigate();
   const { showAlert } = useAlert();
   const api = useApi();
+  const auth = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [openInfo, setOpenInfo] = useState<boolean>(false);
@@ -33,6 +37,8 @@ export default function UsersComponent() {
           const err = error as AxiosError;
           if (err.response?.status === 401) {
             showAlert(`Usuario no Autenticado`, "error");
+            auth.logOut();
+            navigate("/login");
           }
         } else {
           showAlert(`Error con el servidor`, "error");
