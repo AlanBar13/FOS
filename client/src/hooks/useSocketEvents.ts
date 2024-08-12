@@ -15,6 +15,7 @@ export function useSocketEvents(events: SocketEvent[]) {
     return function () {
       for (const event of events) {
         socket.off(event.name);
+        socket.disconnect()
       }
     };
   }, []);
