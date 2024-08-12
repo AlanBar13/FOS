@@ -76,6 +76,15 @@ export default function MenuPage() {
               },
             });
             break;
+          case "itemReady":
+            dispatch({
+              type: "updateItems",
+              payload: {
+                orderItems: items,
+              },
+            });
+            showAlert("Tu pedido esta listo, en un momento se llevara a tu mesa", "info");
+            break;
           default:
             dispatch({
               type: "updateItems",
