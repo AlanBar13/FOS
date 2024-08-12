@@ -9,6 +9,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import { debounce } from "lodash";
 
 interface MenuItemComponentProps {
   item: RawMenu;
@@ -106,7 +107,7 @@ export default function MenuItemComponent({
           <ControlsComponent value={qty} operation={handleChange} />
           <Button
             sx={{ marginLeft: "0.1rem" }}
-            onClick={() => onAddClicked(item, qty)}
+            onClick={debounce(() => onAddClicked(item, qty), 300)}
           >
             Añadir
           </Button>

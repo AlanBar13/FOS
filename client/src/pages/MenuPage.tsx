@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import lod from "lodash";
+import lod, { debounce } from "lodash";
 import { Cart } from "../models/Cart";
 import { RawMenu, RawOrderItem } from "../models/Order";
 import { FeedbackType } from "../models/SocketModels";
@@ -314,7 +314,7 @@ export default function MenuPage() {
         title="Deseas continuar?"
         isOpen={openModal}
         onCancel={() => setOpenModal(false)}
-        onConfirm={order}
+        onConfirm={debounce(order, 300)}
       >
         <Typography>
           Una vez agregados los productos no se podra hacer cambios a la orden,
