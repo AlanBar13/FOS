@@ -51,7 +51,7 @@ const updateAndReplace = (
   current: RawOrderItem[],
   newValues: RawOrderItem[],
 ): RawOrderItem[] => {
-  let newItems = current.map((item) => {
+  const newItems = current.map((item) => {
     const item2 = _.find(newValues, { id: item.id });
     return item2 ? { ...item, ...item2 } : item;
   });

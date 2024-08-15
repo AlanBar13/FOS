@@ -46,7 +46,7 @@ export default function MenuPage() {
   const api = useApi();
   const dispatch = useCurrentOrderDispatch();
   const query = useQuery();
-  const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
+  const [companyName] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
   const [openCart, setOpenCart] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [tableId] = useState<string | null>(query.get("mesa"));
@@ -150,7 +150,7 @@ export default function MenuPage() {
       return;
     }
 
-    let newItemsOrdered: RawOrderItem[] = [];
+    const newItemsOrdered: RawOrderItem[] = [];
     await Promise.all(
       cart.map(async (crt) => {
         try {

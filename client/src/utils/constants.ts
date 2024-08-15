@@ -41,7 +41,7 @@ export class OrderStatus {
 
   static getStatusArray(): KeyValues[] {
     return Object.keys(OrderStatus).map((status) => {
-      let obj: KeyValues = {
+      const obj: KeyValues = {
         key: status,
         value: this.getSpanishName(status),
       };

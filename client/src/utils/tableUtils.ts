@@ -1,6 +1,6 @@
 export type Order = "asc" | "desc";
 
-export function createCompareFn<T extends Object>(
+export function createCompareFn<T extends object>(
   property: keyof T,
   sort_order: Order,
 ) {
