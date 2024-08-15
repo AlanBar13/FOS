@@ -24,4 +24,12 @@ export class OrderService {
   async deleteItem(id: string, itemId: number): Promise<AxiosResponse> {
     return await this._apiService.delete(`/admin/order/${id}/items/${itemId}`);
   }
+
+  async fetchOrdersStatus(): Promise<boolean> {
+    return (await this._apiService.get("/admin/order/state")).data;
+  }
+
+  async toggleOrderStatus() {
+    return await this._apiService.post("/admin/order/state");
+  }
 }

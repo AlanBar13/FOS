@@ -11,6 +11,7 @@ import MenuComponent from "./components/AdminPage/MenuComponent";
 import OrdersComponent from "./components/AdminPage/OrdersComponent";
 import TablesComponent from "./components/AdminPage/TablesComponent";
 import UsersComponent from "./components/AdminPage/UsersComponent";
+import ToolsComponent from "./components/AdminPage/ToolsComponent";
 import OrderPreviewComponent from "./components/AdminPage/Orders/OrderPreviewComponent";
 
 const router = createBrowserRouter([
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: "users",
         Component: UsersComponent,
+      },
+      {
+        path: "tools",
+        Component: ToolsComponent,
       },
       {
         path: "orders/:id",

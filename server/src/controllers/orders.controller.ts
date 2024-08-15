@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { Prisma, enum_Orders_status } from "@prisma/client";
-import { OrderStatus, ItemStatus, FoodCategories } from "../constants";
+import { OrderStatus, ItemStatus, FoodCategories, ORDERING_ENABLED_KEY } from "../constants";
 import { CustomRequest, OrderQueryFilters } from "../types";
 import { sendTicketEmail } from "../services/email.service";
 import db from "../db/client";
 import { excludeFields } from "../db/utils";
+import cache from "../utils/cache";
+import logger from "../utils/logger";
+import orderingService from "../services/ordering.service";
 
 const select = excludeFields<Prisma.OrderFieldRefs>(db.order.fields, ["email"]);
 
@@ -17,6 +20,12 @@ export const getOrders = asyncHandler(async (req: Request, res: Response) => {
 
 export const registerOrder = asyncHandler(
   async (req: Request, res: Response) => {
+    const orderEnabled = orderingService.orderingState;
+    if (!orderEnabled) {
+      res.status(403);
+      throw new Error(`Server not accepting orders`);
+    }
+
     const tableId = Number(req.params.tableId);
 
     const existingOrder = await db.order.findFirst({
@@ -269,5 +278,28 @@ export const changeOrderStatusAdmin = asyncHandler(
     });
 
     res.json(updated);
+  },
+);
+
+export const orderingStatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const orderEnabled = orderingService.orderingState;
+    res.json(orderEnabled)
+  },
+);
+
+export const toggleOrderingState = asyncHandler(
+  async (req: CustomRequest, res: Response) => {
+    const orderEnabled = orderingService.orderingState;
+
+    if (orderEnabled) {
+      orderingService.disableOrdering();
+      req.io?.emit("orderingStatus", false);
+    }else{
+      orderingService.enableOrdering();
+      req.io?.emit("orderingStatus", true)
+    }
+
+    res.json({ message: `Order set to ${!orderEnabled ? 'enabled': 'disabled'}`})
   },
 );

@@ -1,3 +1,5 @@
+export const ORDERING_ENABLED_KEY = "ordering-key";
+
 export class OrderStatus {
   static readonly created = "created";
   static readonly ordering = "ordering";

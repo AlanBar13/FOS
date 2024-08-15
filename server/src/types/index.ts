@@ -33,6 +33,7 @@ export interface ServerToClientEvents {
     type: FeedbackType,
     orderId: number,
   ) => void;
+  orderingStatus: (status: boolean) => void;
 }
 
 export interface ClientToServerEvents {
