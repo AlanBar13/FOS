@@ -30,6 +30,7 @@ import {
   CustomRequest,
 } from "./types";
 import { protectRoutes } from "./middleware/authMiddleware";
+import orderingService from "./services/ordering.service";
 
 const app: Express = express();
 const httpServer = http.createServer(app);
@@ -82,6 +83,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 const port = env.port;
+
+if (env.mode === "dev"){
+  orderingService.enableOrdering();
+}else{
+  orderingService.disableOrdering();
+}
 
 httpServer.listen(port, () => {
   logger.info(`FOS API server running on port ${port}`);

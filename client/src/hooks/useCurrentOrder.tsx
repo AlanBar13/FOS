@@ -16,7 +16,7 @@ const initialSate: CurrentOrderState = {
 };
 const CurrentOrderContext = createContext<CurrentOrderState>(initialSate);
 const CurrentOrderDispatch = createContext<Dispatch<CurrentOrderDispatchType>>(
-  (_: CurrentOrderDispatchType) => {},
+  () => {},
 );
 
 export function useCurrentOrder() {

@@ -21,7 +21,7 @@ export default function OrderPreviewFormComponent({
   tips = 0,
   UpdateOrder,
 }: OrderPreviewFormProps) {
-  const [statusArray, _] = useState<KeyValues[]>(OrderStatus.getStatusArray());
+  const [statusArray] = useState<KeyValues[]>(OrderStatus.getStatusArray());
   const [statusValue, setStatusValue] = useState<string>(orderStatus);
   const [tip, setTip] = useState<number>(tips);
 

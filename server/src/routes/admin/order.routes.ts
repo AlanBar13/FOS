@@ -6,12 +6,15 @@ import {
   getOrderWithItems,
   updateOrder,
   changeOrderStatusAdmin,
+  toggleOrderingState,
+  orderingStatus
 } from "../../controllers/orders.controller";
 import { deleteItemByOrderId } from "../../controllers/orderItem.controller";
 
 const router = express.Router();
 
 router.route("/").get(getOrders);
+router.route("/state").post(toggleOrderingState).get(orderingStatus);
 router
   .route("/:id")
   .get(getOrderWithItems)

@@ -23,6 +23,7 @@ import CartComponent from "../components/MenuPage/CartComponent";
 import DialogComponent from "../components/Shared/DialogComponent";
 import TabsComponent from "../components/MenuPage/TabsComponent";
 import PaymentComponent from "../components/MenuPage/PaymentComponent";
+import { AxiosError } from "axios";
 
 const drawerBleeding = 56;
 
@@ -45,7 +46,7 @@ export default function MenuPage() {
   const api = useApi();
   const dispatch = useCurrentOrderDispatch();
   const query = useQuery();
-  const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
+  const [companyName] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
   const [openCart, setOpenCart] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [tableId] = useState<string | null>(query.get("mesa"));
@@ -149,7 +150,7 @@ export default function MenuPage() {
       return;
     }
 
-    let newItemsOrdered: RawOrderItem[] = [];
+    const newItemsOrdered: RawOrderItem[] = [];
     await Promise.all(
       cart.map(async (crt) => {
         try {
@@ -201,7 +202,13 @@ export default function MenuPage() {
         setOrderId(orderCreated.id);
         await addItemToCart(orderCreated.id);
       } catch (error) {
-        showAlert(`Error ${error}`, "error");
+        const err = error as AxiosError;
+        console.log(err);
+        if (err.response?.status === 403){
+          showAlert(`Ordenes desactivadas, contacta a un mesero`, "error");
+        }else {
+          showAlert(`Error ${error}`, "error");
+        }
       }
     } else {
       await addItemToCart(orderId);

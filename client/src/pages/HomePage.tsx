@@ -14,7 +14,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
   const api = useApi();
-  const [companyName, _] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
+  const [companyName] = useState<string>(import.meta.env.VITE_COMPANY_NAME);
   const [selection, setSelection] = useState<string>("");
   const [tables, setTables] = useState<Table[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
